@@ -1,0 +1,17 @@
+# Blender 3.6.4 MTL File: 'largest.blend'
+# www.blender.org
+
+newmtl asteroid.001
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 1
+Pr 0.868182
+Pm 0.000000
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
+map_Kd asteroid_01.png
+map_d asteroid_01.png
