@@ -5,10 +5,17 @@ ifndef VERB
 endif
 
 linuxLibs:
+	echo "---rlImGui---"
 	cd libs/out/linux && \
 		c++ \
 		-c ../../rayImGui/*.cpp &&\
 		ar rcs librlimgui.a *.o \
+	&& cd ../../..
+	echo "---frustum---"
+	cd libs/out/linux && \
+		cc \
+		-c ../../frustum/*.c &&\
+		ar rcs libfrustum.a *.o \
 	&& cd ../../..
 
 linux: # This target assumes you have raylib installed onto /usr/local/(bin/include).
@@ -18,17 +25,25 @@ linux: # This target assumes you have raylib installed onto /usr/local/(bin/incl
 	-Llibs/out/linux \
 	-lrlimgui \
 	-lraylib \
+	-lfrustum \
 	-Ilibs \
 	-o bin/linux/AsteroidMiner \
 	-DPLATFORM_DESKTOP \
 	$(ADDITIONAL_FLAGS)
 
 webLibs:
+	echo "---rlImGui---"
 	cd libs/out/web && \
 		emcc -c ../../rayImGui/*.cpp \
 		-I. -I../../../raylib/raylib-5.0/src -Ilibs \
 		&& emar rcs librlimgui.a *.o \
-		&& cd ../../.. \
+	&& cd ../../.. 
+	echo "---frustum---"
+	cd libs/out/web && \
+		emcc -c ../../frustum/*.c\
+		-I. -I../../../raylib/raylib-5.0/src -Ilibs \
+		&& emar rcs libfrustum.a *.o \
+	&& cd ../../.. 
 
 web:
 	echo "---web---"
@@ -37,6 +52,7 @@ web:
 	-Os -Wall -std=c++20 \
 	./raylib/raylib-5.0/src/libraylib.a \
 	./libs/out/web/librlimgui.a \
+	./libs/out/web/libfrustum.a \
 	-I. -I./raylib/raylib-5.0/src -Ilibs \
 	-L. -L./raylib/raylib-5.0/src -Llibs/out/web \
 	-s USE_GLFW=3 -s ASYNCIFY \

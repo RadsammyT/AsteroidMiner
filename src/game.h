@@ -1,7 +1,17 @@
-#include <raylib.h>
+#pragma once
 
-#define HEIGHT GetScreenHeight()
-#define WIDTH GetScreenWidth()
+#include <raylib.h>
+#include <vector>
+#include "frustum/Frustum.h"
+
+#ifndef NO_DEBUG
+#define DEBUG_MODE 1
+#else
+#define DEBUG_MODE 0
+#endif
+
+#define HEIGHT 800
+#define WIDTH 1400
 
 #define RAND_VEC3 {(float)(rand() % 100000) / 100000, \
 					(float)(rand() % 100000) / 100000, \
@@ -26,18 +36,22 @@
 #define SSD state.station.dialogue
 #define SSDP state->station.dialogue
 
+#define SETMODEL(modelVar, model) modelVar = IsModelReady(*model) ? model : &state->models.errorFallback
+
 #define DIALOG(SPEAKER, MESSAGE, NEXTDIALOG) \
 			writeToCharArr(MESSAGE, state->station.dialogue.fullMessage); \
 			state->station.dialogue.maxChars = strlen(MESSAGE); \
 			writeToCharArr(SPEAKER, state->station.dialogue.speaker); \
 			state->station.dialogue.nextDialog = NEXTDIALOG;
 
+#define PSETPLAYERPOS(x_pos) state->station.playerPosition.x = x_pos
+
 #define INTERACTABLE(X, Y, W, H, DIALOGNUM) \
-			if(CheckCollisionRecs({stationPlyPos.x + 5.0f, stationPlyPos.y - 32, 10, 3}, \
+			if(CheckCollisionRecs({stationPlyPos.x - 16.0f, stationPlyPos.y - 32, 32, 3}, \
 						{X,Y,W,H})) { \
 				if(state->station.stationState != DIALOG) \
 					DrawTexturePro(state->textures.buttons, KEY_E_SOURCE, \
-							{stationPlyPos.x, stationPlyPos.y - 29, 10, 10},  \
+							{stationPlyPos.x - 12, stationPlyPos.y - 64, 16, 16},  \
 							{-5, 10}, 0, WHITE); \
 				if(DIALOGCHECK) { \
 					undertale(state, DIALOGNUM); \
@@ -46,13 +60,15 @@
 
 #define ENDDIALOGUEP state->station.stationState = WALK;
 
-#define ANIM_SPEED 5.0f/60.0f
-#define WALK_SPEED 50
+#define RAND_FLOAT (float)(rand()%100000) / 100000
 
-extern float rotations[5][3]; // SHOULD be from main.cpp
+#define ANIM_SPEED 10.0f/60.0f
+#define WALK_SPEED 50
 
 const Rectangle WALKING_CYCLE_ARR[5] = {MAN_SPRITE_WALK1_SOURCE, MAN_SPRITE_MIDWALK_SOURCE,
 							MAN_SPRITE_WALK2_SOURCE, MAN_SPRITE_MIDWALK_SOURCE, MAN_SPRITE_STAND_SOURCE};
+
+extern Vector3 rotation;
 
 enum GAME_STATE {
 	STATE_TITLE,
@@ -76,6 +92,7 @@ enum ON_TRANSITION_PEAK {
 	STATION_LEVEL_TO_LEVEL,
 };
 
+struct ShipAsteroid;
 struct GameState {
 	GAME_STATE gameState;
 	struct { // station
@@ -102,27 +119,29 @@ struct GameState {
 	} station;
 	struct { // ship
 		Vector2 shipPosition;
+		Vector2 shipVelocity;
 		float shipRotation;
+		float shipRotVelo;
 		float laserCharge;
+		float airBreakCharge; // 1.00 to 0.00
+
+		std::vector<ShipAsteroid> asteroids;
 	} ship;
 	struct {
 		Texture buttons;
-		Texture font;
-		Texture stationTiles;
 		Texture basePlayer;
+		Texture testRoom;
+		
 	} textures;
 	struct {
+		Model errorFallback; // Used when something went wrong when determining a model 
+
 		Model size5Ast;
 		Model size4Ast;
 		Model size3Ast;
 		Model size2Ast;
 		Model size1Ast;
 	} models;
-	struct {
-		int currentChoice;
-		int choiceMax;
-		int titleState;
-	} title;
 	struct {
 		bool active;
 		bool atPeak;
@@ -131,7 +150,25 @@ struct GameState {
 		int onPeak;
 		int toLevel;
 	} transition;
+#if DEBUG_MODE
+	struct {
+		float asteroidHitboxSizes[5];
+		bool drawHitboxes = false;
+	} debug;
+#endif
 };
+
+struct ShipAsteroid {
+	Vector2 pos;
+	Vector2 velocity;
+	Vector4 cosAsteroidRotation;
+	int size; // see GameState.models 
+
+	float durability;
+	 // Must be called during drawing in 3d mode
+	void DrawAst(GameState*, Frustum*);
+	float getSphereRad();
+}; 
 
 void DoTitle(GameState*);
 
@@ -143,12 +180,12 @@ void DoShip(GameState*, Camera3D*);
 void CheckInteract(GameState*);
 void HandleState(GameState*);
 void undertale(GameState*, int);
-void transitionToShip(GameState*);
+void transitionToShip(GameState*, int);
 void transitionToStationLevel(GameState*, int);
 void onTransitionPeak(GameState*);
 
 void writeToCharArr(const char*, char*, int = -1);
 void DrawPlayerTex(GameState*);
 
-void randomizeRotations(float[5][3]);
+void randomizeRotations(Vector4);
 

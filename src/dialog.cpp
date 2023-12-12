@@ -1,3 +1,4 @@
+
 #include "game.h"
 #include <cstdio>
 #include <cstdlib>
@@ -18,21 +19,31 @@ void undertale(GameState* state, int dialog) {
 			break;
 		case 2:
 			transitionToStationLevel(state, TEST_LEVEL_TRANSITION);
+			PSETPLAYERPOS(0);
 			ENDDIALOGUEP;
 			break;
 		case 5:
-			DIALOG(SPEAKER_NARRATOR, "Tis just a big brick of shit...\n\n\n\n"
-									 "Nothing special about it.", false);
+			DIALOG("You", "Tis just a big brick of shit...\n\n\n\n"
+									 "Nothing special about it.", true);
+			state->station.dialogue.num = 10 - 1;
 			break;
 		case 6: 
 			DIALOG(SPEAKER_NARRATOR, "You go through the door.", true);
 			break;
 		case 7:
 			transitionToStationLevel(state, TEST_LEVEL);
+			PSETPLAYERPOS(-25);
 			ENDDIALOGUEP;
 			break;
 		case 8:
-			transitionToShip(state);
+			DIALOG(SPEAKER_NARRATOR, "You go through the airlock and board the ship.", true);
+			break;
+		case 9:
+			transitionToShip(state, 15);
+			break;
+		case 10:
+			DIALOG("You", "It also smells.                    \n\n\n\n"
+									"Like, really bad.", false);
 			break;
 		default:
 			DIALOG("ERROR", TextFormat("Case not found for dialog %d", dialog), false);

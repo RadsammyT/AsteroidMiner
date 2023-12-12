@@ -6,16 +6,13 @@
 #include "game.h"
 
 
-#define DEBUG_MODE 1
-
 int main() {
-	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-	InitWindow(1920, 1080, "Asteroid Miner");
+	SetConfigFlags(FLAG_MSAA_4X_HINT);
+	InitWindow(WIDTH, HEIGHT, "Asteroid Miner");
 	InitAudioDevice();
 
 	srand(time(NULL));
-
-	randomizeRotations(rotations);
+	rotation = {RAND_FLOAT, RAND_FLOAT, RAND_FLOAT};
 #if defined(PLATFORM_WEB)
 	SetExitKey(NULL);
 #endif
@@ -24,12 +21,13 @@ int main() {
 	rlImGuiSetup(true);
 	bool drawTestTex = true;
 	bool drawImGuiDemo = false;
+	bool drawplayerPosPoint = true;
 	Texture testTex = LoadTexture("resources/web/manBase.png");
 	Rectangle source, dest = {};
 	Vector2 origin = {};
 	float rotation = 0;
 #endif
-	GameState state;
+	GameState state = {};
 
 	state.gameState = STATE_TITLE;
 	state.station.playerPosition = {0,0};
@@ -46,18 +44,32 @@ int main() {
 	state.textures.buttons = LoadTexture("resources/tilemap_white.png");
 #endif
 	state.textures.basePlayer = LoadTexture("resources/web/manBase.png");
+	state.textures.testRoom = LoadTexture("resources/web/test_room_16.png");
 
 	Camera2D stationCam = {
 		.offset = {(float)GetScreenWidth()/2, (float)GetScreenHeight()/2},
 		.target = state.station.playerPosition,
 		.rotation = 0.0f,
-		.zoom = 10.0f,
+		.zoom = 5.0f,
 	};
 
-	state.models.size5Ast = LoadModel("resources/web/asteroids.obj");
+	Camera3D shipCam = {
+		.position = {5,0,5},
+		.target = {0, 0, 0},
+		.up = {0, 1, 0},
+		.fovy = 90.0f,
+		.projection = CAMERA_PERSPECTIVE,
+	};
+
+	state.models.errorFallback = LoadModel("resources/web/missing.obj");
+
+	state.models.size5Ast = LoadModel("resources/web/asteroid5.obj");
+	state.models.size4Ast = LoadModel("resources/web/asteroid4.obj");
+	state.models.size3Ast = LoadModel("resources/web/asteroid3.obj");
+	state.models.size2Ast = LoadModel("resources/web/asteroid2.obj");
+	state.models.size1Ast = LoadModel("resources/web/asteroid1.obj");
 
 	while(!WindowShouldClose()) {
-		stationCam.target = {0, -10};
 		BeginDrawing();
 			if(state.gameState == GAME_STATE::STATE_TITLE) {
 				DoTitle(&state);
@@ -65,10 +77,18 @@ int main() {
 			if(state.gameState == GAME_STATE::STATE_STATION) {
 				DoStation(&state, &stationCam);
 			}
+			if(state.gameState == GAME_STATE::STATE_SHIP) {
+				DoShip(&state, &shipCam);
+			}
 #if DEBUG_MODE
 			if(drawTestTex) {
 				BeginMode2D(stationCam);
 					DrawTexturePro(testTex,  source, dest, origin, rotation, WHITE);
+				EndMode2D();
+			}
+			if(drawplayerPosPoint) {
+				BeginMode2D(stationCam);
+					DrawCircleV(state.station.playerPosition, 1.5f, WHITE);
 				EndMode2D();
 			}
 			rlImGuiBegin();
@@ -81,6 +101,7 @@ int main() {
 								state.station.playerPosition.x, state.station.playerPosition.y);
 						ImGui::Text("station state: %d", state.station.stationState);
 						ImGui::Checkbox("draw test tex",&drawTestTex);
+						ImGui::Checkbox("draw playerPos point", &drawplayerPosPoint);
 						if(drawTestTex) {
 							ImGui::DragFloat4("Source", &source.x);
 							ImGui::DragFloat4("Dest", &dest.x);
@@ -98,6 +119,23 @@ int main() {
 							ImGui::Text("disengaged: %d", state.station.dialogue.alreadyDisengaged);
 							ImGui::TreePop();
 						}
+						ImGui::TreePop();
+					}
+					if(ImGui::TreeNode("Ship")) {
+						ImGui::Text("Ship Pos: %.04f %.04f", 
+								state.ship.shipPosition.x,
+								state.ship.shipPosition.y);
+						ImGui::Text("Ship Vel: %.04f %.04f", 
+								state.ship.shipVelocity.x,
+								state.ship.shipVelocity.y);
+						ImGui::Text("Ship Rot: (rad/real) %.02f \n\t\t  (deg) %.02f",
+								state.ship.shipRotation,
+								state.ship.shipRotation * RAD2DEG);
+						ImGui::Text("Ship RotVel: %.05f", state.ship.shipRotVelo);
+						ImGui::Text("Airbreak Charge: %.05f", state.ship.airBreakCharge);
+						ImGui::Text("Laser Charge: %.02f", state.ship.laserCharge);
+						ImGui::Checkbox("Draw Hitboxes", &state.debug.drawHitboxes);
+						ImGui::DragScalarN("Asteroid Hitboxes", ImGuiDataType_Float, state.debug.asteroidHitboxSizes, 5);
 						ImGui::TreePop();
 					}
 				ImGui::End();
