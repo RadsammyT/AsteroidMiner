@@ -5,12 +5,10 @@
 #include "rayImGui/rlImGui.h"
 #include "game.h"
 
-
 int main() {
 	SetConfigFlags(FLAG_MSAA_4X_HINT);
 	InitWindow(WIDTH, HEIGHT, "Asteroid Miner");
 	InitAudioDevice();
-
 	srand(time(NULL));
 	rotation = {RAND_FLOAT, RAND_FLOAT, RAND_FLOAT};
 #if defined(PLATFORM_WEB)
@@ -21,7 +19,9 @@ int main() {
 	rlImGuiSetup(true);
 	bool drawTestTex = true;
 	bool drawImGuiDemo = false;
-	bool drawplayerPosPoint = true;
+	bool drawplayerPosPoint = false;
+	bool infAirBreak = false;
+	bool infLaserCharge = false;
 	Texture testTex = LoadTexture("resources/web/manBase.png");
 	Rectangle source, dest = {};
 	Vector2 origin = {};
@@ -91,6 +91,12 @@ int main() {
 					DrawCircleV(state.station.playerPosition, 1.5f, WHITE);
 				EndMode2D();
 			}
+			if(infAirBreak) {
+				state.ship.airBreakCharge = 1;
+			}
+			if(infLaserCharge) {
+				state.ship.laserCharge = 1;
+			}
 			rlImGuiBegin();
 				ImGui::Begin("Debug");
 					ImGui::Text("FPS: %d", GetFPS());
@@ -134,8 +140,17 @@ int main() {
 						ImGui::Text("Ship RotVel: %.05f", state.ship.shipRotVelo);
 						ImGui::Text("Airbreak Charge: %.05f", state.ship.airBreakCharge);
 						ImGui::Text("Laser Charge: %.02f", state.ship.laserCharge);
+						ImGui::Text("Laser Collide: %f %f",
+								state.debug.laserCollide.x,
+								state.debug.laserCollide.y);
 						ImGui::Checkbox("Draw Hitboxes", &state.debug.drawHitboxes);
-						ImGui::DragScalarN("Asteroid Hitboxes", ImGuiDataType_Float, state.debug.asteroidHitboxSizes, 5);
+						ImGui::Checkbox("Inf Airbreak", &infAirBreak);
+						ImGui::Checkbox("Inf Laser", &infLaserCharge);
+						ImGui::Checkbox("2D mode", &state.debug.ship2dRep);
+						ImGui::DragScalarN("Asteroid Hitboxes",
+								ImGuiDataType_Float, state.debug.asteroidHitboxSizes, 5);
+						ImGui::DragFloat("Circle Rad Multi", &state.debug.multiplier);
+						ImGui::DragFloat("2d zoom", &state.debug.zoom2d);
 						ImGui::TreePop();
 					}
 				ImGui::End();

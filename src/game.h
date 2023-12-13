@@ -17,8 +17,6 @@
 					(float)(rand() % 100000) / 100000, \
 					(float)(rand() % 100000) / 100000}
 
-#define TITLE_MAX_ENTRIES 3
-
 #define SPEAKER_NARRATOR "<NARR>"
 
 #define MAN_SPRITE_STAND_SOURCE {0, 0, 32, 32}
@@ -122,7 +120,9 @@ struct GameState {
 		Vector2 shipVelocity;
 		float shipRotation;
 		float shipRotVelo;
-		float laserCharge;
+		float laserCharge; // also 1.00 to 0.00. about 5 seconds to use up, 10 seconds to recharge
+		bool isLasering;
+		RayCollision laserCollide;
 		float airBreakCharge; // 1.00 to 0.00
 
 		std::vector<ShipAsteroid> asteroids;
@@ -154,6 +154,12 @@ struct GameState {
 	struct {
 		float asteroidHitboxSizes[5];
 		bool drawHitboxes = false;
+		Vector2 laserPos;
+		Vector2 laserEdge;
+		Vector2 laserCollide;
+		float multiplier = 1;
+		float zoom2d;
+		bool ship2dRep;
 	} debug;
 #endif
 };
@@ -164,9 +170,11 @@ struct ShipAsteroid {
 	Vector4 cosAsteroidRotation;
 	int size; // see GameState.models 
 
+	Model* model;
 	float durability;
+	bool lasered;
 	 // Must be called during drawing in 3d mode
-	void DrawAst(GameState*, Frustum*);
+	void DrawAst(GameState*, Camera3D*);
 	float getSphereRad();
 }; 
 
@@ -188,4 +196,6 @@ void writeToCharArr(const char*, char*, int = -1);
 void DrawPlayerTex(GameState*);
 
 void randomizeRotations(Vector4);
+
+Vector3 Vector2to3XZ(Vector2);
 
