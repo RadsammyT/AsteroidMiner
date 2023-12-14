@@ -45,6 +45,9 @@ int main() {
 #endif
 	state.textures.basePlayer = LoadTexture("resources/web/manBase.png");
 	state.textures.testRoom = LoadTexture("resources/web/test_room_16.png");
+	state.textures.shipUiArrow = LoadTexture("resources/web/uiArrow.png");
+	state.textures.shipAirbreakGauge = LoadTexture("resources/web/uiAirbreak.png");
+	state.textures.shipLaserGauge = LoadTexture("resources/web/uiLaser.png");
 
 	Camera2D stationCam = {
 		.offset = {(float)GetScreenWidth()/2, (float)GetScreenHeight()/2},

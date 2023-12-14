@@ -39,7 +39,7 @@ void undertale(GameState* state, int dialog) {
 			DIALOG(SPEAKER_NARRATOR, "You go through the airlock and board the ship.", true);
 			break;
 		case 9:
-			transitionToShip(state, 15);
+			transitionToShip(state, 2);
 			break;
 		case 10:
 			DIALOG("You", "It also smells.                    \n\n\n\n"

@@ -131,7 +131,9 @@ struct GameState {
 		Texture buttons;
 		Texture basePlayer;
 		Texture testRoom;
-		
+		Texture shipUiArrow;
+		Texture shipAirbreakGauge;
+		Texture shipLaserGauge;
 	} textures;
 	struct {
 		Model errorFallback; // Used when something went wrong when determining a model 

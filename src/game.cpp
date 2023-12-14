@@ -1,13 +1,8 @@
 #include "game.h"
 #include "frustum/Frustum.h"
-#include <cmath>
-#include <cstdlib>
 #include <cstring>
 
 #include <raylib.h>
-#include <raymath.h>
-#include <rcamera.h>
-#include <rlgl.h>
 
 Vector3 rotation = {};
 

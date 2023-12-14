@@ -62,6 +62,23 @@ void DoShip(GameState *state, Camera3D *cam) {
 	DrawRectangle(0, 0, 200, HEIGHT, BROWN);
 	DrawRectangle(WIDTH-200, 0, 200, HEIGHT, BROWN);
 
+	DrawCircleLinesV({100, 100}, 80, ColorBrightness(BROWN, 0.5));
+	DrawTexturePro(state->textures.shipUiArrow,
+			{0, 0, 16, 16}, {100,100,64,64}, {32,32}, -state->ship.shipRotation * RAD2DEG, WHITE);
+	DrawRectangle(WIDTH-(200-40),
+			(200 - (200 * state->ship.airBreakCharge)) + 30,
+			113,
+			(200 * state->ship.airBreakCharge), BLUE);
+	DrawTexturePro(state->textures.shipAirbreakGauge,
+			{0,0,32,64}, {WIDTH-(200-32), 0, 64*2, 128*2}, {0,0}, 0, WHITE);
+
+	DrawRectangle(WIDTH-(200-40),
+			(200 - (200 * state->ship.laserCharge)) + 30 + (HEIGHT - 300),
+			113,
+			(200 * state->ship.laserCharge), RED);
+	DrawTexturePro(state->textures.shipLaserGauge,
+			{0,0,32,64}, {WIDTH-(200-32), HEIGHT - 300, 64*2, 128*2}, {0,0}, 0, WHITE);
+
 	if(state->transition.active) {
 		if(state->transition.transitionTime >= 0)
 			DrawRectangle(0, 0, 2000,2000, BLACK);
