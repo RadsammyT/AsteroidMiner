@@ -1,0 +1,5 @@
+day 1:
+	flag 0: is the phone ringing? ON = emit phone ringing sound
+			until flag 1 is on
+	flag 1: is the phone answered? phone ringing sound is no longer
+			emitted once this is on

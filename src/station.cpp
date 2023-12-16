@@ -14,10 +14,29 @@ void DrawStation(GameState* state) {
 			DrawRectangle(-100, -50, 100, 50, BROWN); // dialogue test
 			DrawRectangle(50, -50, 100, 50, GREEN); //  transition to another room
 			break;
-	}
+        case PROTAG_ROOM:
+			PLAYERBOUNDS(-80, 90);
+			DrawTexture(state->textures.protagRoom, -112, -112, WHITE);
+			break;
+        case MAIN_HALLWAY:
+        case SHIP_BOARDING:
+        case CAFETERIA:
+        case MANAGERS_OFFICE:
+          break;
+        case INTRO:
+		  DrawRectangle(0, 0, 2000, 2000, BLACK);
+          break;
+        }
 }
 
 void DoStation(GameState* state, Camera2D* stationCam) {
+
+			if(PFLAG[0] && !PFLAG[1] && PDAY == 1) {
+				if(!IsSoundPlaying(state->sounds.phoneRing)) {
+					PlaySound(state->sounds.phoneRing);
+				}
+			}
+
 			ClearBackground(BLACK);
 			stationCam->target = {0, -30};
 			if(state->station.stationLevel == TEST_LEVEL) {
@@ -26,10 +45,13 @@ void DoStation(GameState* state, Camera2D* stationCam) {
 			BeginMode2D(*stationCam);
 				DrawStation(state);
 #if DEBUG_MODE
-				DrawRectangleV({(float)(state->station.playerPosition.x-16),
+				DrawRectangleV({(float)(state->station.playerPosition.x-23),
 						state->station.playerPosition.y - 32},
 						{32,3},
 						{255, 0, 0, 64});
+				if(state->debug.drawTestRec) {
+					DrawRectangleRec(state->debug.testRec, {255, 0, 0, 128});
+				}
 #endif
 				DrawPlayerTex(state);
 				CheckInteract(state);
@@ -67,16 +89,47 @@ void CheckInteract(GameState* state) {
 			INTERACTABLE(-100, -50, 100, 50, 5);
 			INTERACTABLE(50, -50, 100, 50, 6);
 			break;
-	}
-	if(SSDP.alreadyDisengaged) {
+        case PROTAG_ROOM:
+			if(PDAY == 1) {
+				if(PFLAG[0] && !PFLAG[1]) {
+					INTERACTABLE(2, -46.5, 13.5, 35.5, 1'01'100);
+				}
+			}
+			break;
+        case MAIN_HALLWAY:
+        case SHIP_BOARDING:
+        case CAFETERIA:
+        case MANAGERS_OFFICE:
+          break;
+        case INTRO:
+          break;
+        }
+        if(SSDP.alreadyDisengaged) {
 		SSDP.alreadyDisengaged = false;
 	}
 }
 
-void transitionToStationLevel(GameState *state, int level) {
+void DrawPlayerTex(GameState *state) {
+	if(state->station.stationLevel == INTRO)
+		return;
+	auto multi = WALKING_CYCLE_ARR[state->station.anim.currentCycle];
+	if(state->station.anim.direction) {
+		multi.width *= -1;
+	}
+	DrawTexturePro(state->textures.basePlayer, multi,
+			{state->station.playerPosition.x,state->station.playerPosition.y-14.0f, 52, 52},
+			{32, 32}, 0.0f, WHITE);
+}
+
+void transitionToStationLevel(GameState *state, int level, bool dialogAfter, int dialogNum) {
 	state->transition.active = true;
 	state->transition.maxTransitionTime = 1;
 	state->transition.transitionTime = 1;
 	state->transition.onPeak = STATION_LEVEL_TO_LEVEL;
 	state->transition.toLevel = level;
+	state->transition.dialogAfter = dialogAfter;
+	state->transition.dialogNum = dialogNum;
+
+	state->station.playerPosition = {0,0};
+	ENDDIALOGUEP;
 }

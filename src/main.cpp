@@ -23,7 +23,7 @@ int main() {
 	bool infAirBreak = false;
 	bool infLaserCharge = false;
 	Texture testTex = LoadTexture("resources/web/manBase.png");
-	Rectangle source, dest = {};
+	Rectangle source, dest= {};
 	Vector2 origin = {};
 	float rotation = 0;
 #endif
@@ -31,11 +31,14 @@ int main() {
 
 	state.gameState = STATE_TITLE;
 	state.station.playerPosition = {0,0};
-	state.station.stationLevel = TEST_LEVEL;
+	state.station.stationLevel = INTRO;
 	state.station.stationState = WALK;
 	state.station.dialogue = {
 		.timeToNextChar = 0,
 	};
+
+	undertale(&state, 1'00'000);
+
 	state.transition = {};
 	state.station.anim.currentCycle = 3;
 #ifdef PLATFORM_WEB
@@ -44,7 +47,9 @@ int main() {
 	state.textures.buttons = LoadTexture("resources/tilemap_white.png");
 #endif
 	state.textures.basePlayer = LoadTexture("resources/web/manBase.png");
+
 	state.textures.testRoom = LoadTexture("resources/web/test_room_16.png");
+	state.textures.protagRoom = LoadTexture("resources/web/protag_room_furnished.png");
 	state.textures.shipUiArrow = LoadTexture("resources/web/uiArrow.png");
 	state.textures.shipAirbreakGauge = LoadTexture("resources/web/uiAirbreak.png");
 	state.textures.shipLaserGauge = LoadTexture("resources/web/uiLaser.png");
@@ -71,6 +76,10 @@ int main() {
 	state.models.size3Ast = LoadModel("resources/web/asteroid3.obj");
 	state.models.size2Ast = LoadModel("resources/web/asteroid2.obj");
 	state.models.size1Ast = LoadModel("resources/web/asteroid1.obj");
+
+	state.models.station = LoadModel("resources/web/station.obj");
+
+	state.sounds.phoneRing = LoadSound("resources/web/phone.wav");
 
 	while(!WindowShouldClose()) {
 		BeginDrawing();
@@ -116,6 +125,10 @@ int main() {
 							ImGui::DragFloat4("Dest", &dest.x);
 							ImGui::DragFloat2("Origin", &origin.x);
 						}
+						ImGui::Checkbox("draw test rec", &state.debug.drawTestRec);
+						if(state.debug.drawTestRec) {
+							ImGui::DragFloat4("testRec", &state.debug.testRec.x, 0.5);
+						}
 						if(ImGui::TreeNode("Dialogue")) {
 							ImGui::Text("num: %d", state.station.dialogue.num);
 							ImGui::Text("fullM: %s", state.station.dialogue.fullMessage);
@@ -150,10 +163,24 @@ int main() {
 						ImGui::Checkbox("Inf Airbreak", &infAirBreak);
 						ImGui::Checkbox("Inf Laser", &infLaserCharge);
 						ImGui::Checkbox("2D mode", &state.debug.ship2dRep);
+						if(ImGui::Button("Mine All Asteroids")) {
+							state.ship.asteroids.clear();
+						}
 						ImGui::DragScalarN("Asteroid Hitboxes",
 								ImGuiDataType_Float, state.debug.asteroidHitboxSizes, 5);
 						ImGui::DragFloat("Circle Rad Multi", &state.debug.multiplier);
 						ImGui::DragFloat("2d zoom", &state.debug.zoom2d);
+						ImGui::DragFloat3("test cube pos", &state.debug.testCubePos.x);
+						ImGui::DragFloat3("test cube size", &state.debug.testCubeSize.x);
+						ImGui::TreePop();
+					}
+					if(ImGui::TreeNode("Transition")) {
+						ImGui::Text("active: %b", state.transition.active);
+						ImGui::Text("atPeak: %b", state.transition.atPeak);
+						ImGui::Text("transitionTime: %f", state.transition.transitionTime);
+						ImGui::Text("maxTransitionTime: %f", state.transition.maxTransitionTime);
+						ImGui::Text("onPeak: %d", state.transition.onPeak);
+						ImGui::Text("toLevel: %d", state.transition.toLevel);
 						ImGui::TreePop();
 					}
 				ImGui::End();

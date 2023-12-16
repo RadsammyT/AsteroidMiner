@@ -30,26 +30,34 @@
 #define KEY_E_SOURCE {900, 32, 16, 16}
 #endif
 
+#define PFLAG state->story.flags
+#define PDAY state->story.day
 
 #define SSD state.station.dialogue
 #define SSDP state->station.dialogue
 
 #define SETMODEL(modelVar, model) modelVar = IsModelReady(*model) ? model : &state->models.errorFallback
 
-#define DIALOG(SPEAKER, MESSAGE, NEXTDIALOG) \
-			writeToCharArr(MESSAGE, state->station.dialogue.fullMessage); \
-			state->station.dialogue.maxChars = strlen(MESSAGE); \
-			writeToCharArr(SPEAKER, state->station.dialogue.speaker); \
+#define PLAYERBOUNDS(MIN, MAX) \
+if(state->station.playerPosition.x <= MIN)\
+{state->station.playerPosition.x = MIN;}\
+if(state->station.playerPosition.x >= MAX)\
+{state->station.playerPosition.x = MAX;}
+
+#define DIALOG(SPEAKER, MESSAGE, NEXTDIALOG)\
+			writeToCharArr(MESSAGE, state->station.dialogue.fullMessage);\
+			state->station.dialogue.maxChars = strlen(MESSAGE);\
+			writeToCharArr(SPEAKER, state->station.dialogue.speaker);\
 			state->station.dialogue.nextDialog = NEXTDIALOG;
 
 #define PSETPLAYERPOS(x_pos) state->station.playerPosition.x = x_pos
 
 #define INTERACTABLE(X, Y, W, H, DIALOGNUM) \
-			if(CheckCollisionRecs({stationPlyPos.x - 16.0f, stationPlyPos.y - 32, 32, 3}, \
+			if(CheckCollisionRecs({stationPlyPos.x - 23.0f, stationPlyPos.y - 32, 32, 3}, \
 						{X,Y,W,H})) { \
 				if(state->station.stationState != DIALOG) \
 					DrawTexturePro(state->textures.buttons, KEY_E_SOURCE, \
-							{stationPlyPos.x - 12, stationPlyPos.y - 64, 16, 16},  \
+							{stationPlyPos.x - 19, stationPlyPos.y - 50, 16, 16},  \
 							{-5, 10}, 0, WHITE); \
 				if(DIALOGCHECK) { \
 					undertale(state, DIALOGNUM); \
@@ -82,6 +90,13 @@ enum STATION_STATE {
 enum STATION_LEVEL {
 	TEST_LEVEL,
 	TEST_LEVEL_TRANSITION,
+
+	INTRO, // room 00
+	PROTAG_ROOM, // room 01
+	MAIN_HALLWAY, // room 02, camera follows here. 
+	SHIP_BOARDING, // room 03
+	CAFETERIA, // room 04
+	MANAGERS_OFFICE, // room 05
 };
 
 enum ON_TRANSITION_PEAK {
@@ -126,11 +141,16 @@ struct GameState {
 		float airBreakCharge; // 1.00 to 0.00
 
 		std::vector<ShipAsteroid> asteroids;
+		int originalAsteroidsSize;
 	} ship;
 	struct {
 		Texture buttons;
 		Texture basePlayer;
+
 		Texture testRoom;
+		Texture protagRoom; 
+		Texture mainHall;
+
 		Texture shipUiArrow;
 		Texture shipAirbreakGauge;
 		Texture shipLaserGauge;
@@ -143,7 +163,16 @@ struct GameState {
 		Model size3Ast;
 		Model size2Ast;
 		Model size1Ast;
+
+		Model station;
 	} models;
+	struct {
+		Sound phoneRing;
+		Sound doorOpen;
+		Sound doorClose;
+		Sound walkLeft;
+		Sound walkRight;
+	} sounds;
 	struct {
 		bool active;
 		bool atPeak;
@@ -151,7 +180,14 @@ struct GameState {
 		float maxTransitionTime;
 		int onPeak;
 		int toLevel;
+
+		bool dialogAfter;
+		int dialogNum;
 	} transition;
+	struct {
+		int day = 1; // as in days 1-5
+		bool flags[32]; // TODO: document flags
+	} story;
 #if DEBUG_MODE
 	struct {
 		float asteroidHitboxSizes[5];
@@ -160,8 +196,13 @@ struct GameState {
 		Vector2 laserEdge;
 		Vector2 laserCollide;
 		float multiplier = 1;
-		float zoom2d;
+		float zoom2d = 1;
+		Vector3 testCubePos;
+		Vector3 testCubeSize;
 		bool ship2dRep;
+
+		bool drawTestRec = false;
+		Rectangle testRec; 
 	} debug;
 #endif
 };
@@ -191,7 +232,7 @@ void CheckInteract(GameState*);
 void HandleState(GameState*);
 void undertale(GameState*, int);
 void transitionToShip(GameState*, int);
-void transitionToStationLevel(GameState*, int);
+void transitionToStationLevel(GameState*, int, bool = false, int = -1);
 void onTransitionPeak(GameState*);
 
 void writeToCharArr(const char*, char*, int = -1);

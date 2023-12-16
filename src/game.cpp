@@ -49,7 +49,8 @@ void HandleState(GameState * state) {
 	if(state->gameState == GAME_STATE::STATE_STATION) {
 		if(state->transition.active) {
 			state->transition.transitionTime -= GetFrameTime();
-			if((int)state->transition.transitionTime == 0
+			if(state->transition.transitionTime >= -0.1
+					&& state->transition.transitionTime <= 0.0
 					&& !state->transition.atPeak) {
 				state->transition.atPeak = true;
 				onTransitionPeak(state);
@@ -204,7 +205,15 @@ void HandleState(GameState * state) {
 			}
 			ship->shipRotation += ship->shipRotVelo;
 			ship->shipPosition = Vector2Add(ship->shipPosition, ship->shipVelocity);
-			
+
+			if(ship->asteroids.empty()) {
+				if(CheckCollisionSpheres(Vector2to3XZ(ship->shipPosition), 1,
+							{0,0,-1}, 1)) {
+					if(!state->transition.active) {
+						transitionToStationLevel(state, TEST_LEVEL);
+					}
+				}
+			}
 		}
 	}
 }
@@ -223,23 +232,17 @@ void writeToCharArr(const char* in, char * arr, int limit) { // where limit defa
 void onTransitionPeak(GameState *state) {
 	switch(state->transition.onPeak) {
 		case ON_TRANSITION_PEAK::STATION_LEVEL_TO_LEVEL:
+			state->gameState = STATE_STATION;
 			state->station.stationLevel = (STATION_LEVEL)state->transition.toLevel;
+			if(state->transition.dialogAfter) {
+				undertale(state, state->transition.dialogNum);
+				state->transition.dialogAfter = false;
+			}
 			break;
 		case ON_TRANSITION_PEAK::STATION_TO_SHIP:
 			state->gameState = STATE_SHIP;
 			break;
 	}
-}
-
-
-void DrawPlayerTex(GameState *state) {
-	auto multi = WALKING_CYCLE_ARR[state->station.anim.currentCycle];
-	if(state->station.anim.direction) {
-		multi.width *= -1;
-	}
-	DrawTexturePro(state->textures.basePlayer, multi,
-			{state->station.playerPosition.x,state->station.playerPosition.y-26.0f, 64, 64},
-			{32, 32}, 0.0f, WHITE);
 }
 
 Vector3 Vector2to3XZ(Vector2 in) {
