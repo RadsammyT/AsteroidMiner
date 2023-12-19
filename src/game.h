@@ -57,11 +57,14 @@ if(state->station.playerPosition.x >= MAX)\
 						{X,Y,W,H})) { \
 				if(state->station.stationState != DIALOG) \
 					DrawTexturePro(state->textures.buttons, KEY_E_SOURCE, \
-							{stationPlyPos.x - 19, stationPlyPos.y - 50, 16, 16},  \
-							{-5, 10}, 0, WHITE); \
+							{X + (W/2), Y-16, 16, 16},  \
+							{8, 0}, 0, WHITE); \
 				if(DIALOGCHECK) { \
 					undertale(state, DIALOGNUM); \
-				} \
+					break;\
+				} else {\
+					break;\
+				}\
 			} \
 
 #define ENDDIALOGUEP state->station.stationState = WALK;
@@ -150,6 +153,8 @@ struct GameState {
 		Texture testRoom;
 		Texture protagRoom; 
 		Texture mainHall;
+		Texture cafeteria;
+		Texture shipBoarding;
 
 		Texture shipUiArrow;
 		Texture shipAirbreakGauge;
@@ -203,6 +208,8 @@ struct GameState {
 
 		bool drawTestRec = false;
 		Rectangle testRec; 
+
+		int testDialogNum;
 	} debug;
 #endif
 };

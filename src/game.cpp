@@ -35,10 +35,29 @@ void DoTitle(GameState* state) {
 	middle = len - (len/2);
 	DrawText("by RadsammyT", (WIDTH/2) - middle, 250, 24, RED);
 	
+	len = MeasureText("Made for the raylib 2023-2024 SloJam", 12);
+	middle = len - (len/2);
+	DrawText("Made for the raylib 2023-2024 SloJam", (WIDTH/2) - middle, 0, 12, RAYWHITE);
 	
 	len = MeasureText("Press Enter to Play", 48);
 	middle = len - (len/2);
 	DrawText("Press Enter to Play", (WIDTH/2) - middle, HEIGHT - 70, 48, GRAY);
+
+	DrawText(
+			"Credts:\n\n"
+			"Asteroid Models by Albert Buscio on Sketchfab\n"
+			"Sci-Fi platform tiles by Eris on OpenGameArt.org\n"
+			"Phone Ring SFX by timgormly on Freesound\n"
+			"Footsteps SFX by EVRetro on Freesound\n"
+			, 0, 0, 12, RAYWHITE);
+
+	DrawText(
+			"Instructions:\n"
+			"(A/D) or (Left Arrow/Right Arrow) to walk\n"
+			"(E) to interact with an object when prompted\n"
+			"Additional instructions will be given out in-game."
+			, 0, HEIGHT/2, 12, RAYWHITE);
+
 	if(IsKeyPressed(KEY_ENTER)) {
 		state->gameState = STATE_STATION;
 

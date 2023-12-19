@@ -50,6 +50,10 @@ int main() {
 
 	state.textures.testRoom = LoadTexture("resources/web/test_room_16.png");
 	state.textures.protagRoom = LoadTexture("resources/web/protag_room_furnished.png");
+	state.textures.mainHall = LoadTexture("resources/web/main_hall.png");
+	state.textures.cafeteria = LoadTexture("resources/web/cafe_furnished.png");
+	state.textures.shipBoarding = LoadTexture("resources/web/ship_boarding_furnished.png");
+
 	state.textures.shipUiArrow = LoadTexture("resources/web/uiArrow.png");
 	state.textures.shipAirbreakGauge = LoadTexture("resources/web/uiAirbreak.png");
 	state.textures.shipLaserGauge = LoadTexture("resources/web/uiLaser.png");
@@ -79,7 +83,7 @@ int main() {
 
 	state.models.station = LoadModel("resources/web/station.obj");
 
-	state.sounds.phoneRing = LoadSound("resources/web/phone.wav");
+	state.sounds.phoneRing = LoadSound("resources/web/phone_low.wav");
 
 	while(!WindowShouldClose()) {
 		BeginDrawing();
@@ -129,7 +133,20 @@ int main() {
 						if(state.debug.drawTestRec) {
 							ImGui::DragFloat4("testRec", &state.debug.testRec.x, 0.5);
 						}
+						if(ImGui::TreeNode("Story")) {
+							ImGui::DragInt("Day/Story", &state.story.day);
+							for(int i = 0; i < 32; i++) {
+								if(ImGui::Button(TextFormat("%d/%d##BUTTON_%d", i, state.story.flags[i], i))) {
+									state.story.flags[i] = !state.story.flags[i];
+								}
+							}
+							ImGui::TreePop();
+						}
 						if(ImGui::TreeNode("Dialogue")) {
+							ImGui::DragInt("Test Dialog Num", &state.debug.testDialogNum);
+							if(ImGui::Button("call undertale(testDialogNum)")) {
+								undertale(&state, state.debug.testDialogNum);
+							}
 							ImGui::Text("num: %d", state.station.dialogue.num);
 							ImGui::Text("fullM: %s", state.station.dialogue.fullMessage);
 							ImGui::Text("dispM: %s", state.station.dialogue.displayMessage);

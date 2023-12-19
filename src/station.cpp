@@ -19,8 +19,16 @@ void DrawStation(GameState* state) {
 			DrawTexture(state->textures.protagRoom, -112, -112, WHITE);
 			break;
         case MAIN_HALLWAY:
+			PLAYERBOUNDS(-80, 383);
+			DrawTexture(state->textures.mainHall, -112, -112, WHITE);
+			break;
         case SHIP_BOARDING:
+			DrawTexture(state->textures.shipBoarding, -112, -112, WHITE);
+			break;
         case CAFETERIA:
+			PLAYERBOUNDS(-80, 190);
+			DrawTexture(state->textures.cafeteria, -112, -112, WHITE);
+			break;
         case MANAGERS_OFFICE:
           break;
         case INTRO:
@@ -39,7 +47,9 @@ void DoStation(GameState* state, Camera2D* stationCam) {
 
 			ClearBackground(BLACK);
 			stationCam->target = {0, -30};
-			if(state->station.stationLevel == TEST_LEVEL) {
+			if(state->station.stationLevel == TEST_LEVEL ||
+				state->station.stationLevel == MAIN_HALLWAY ||
+				state->station.stationLevel == CAFETERIA) {
 				stationCam->target.x = state->station.playerPosition.x;
 			}
 			BeginMode2D(*stationCam);
@@ -62,13 +72,13 @@ void DoStation(GameState* state, Camera2D* stationCam) {
 			}
 			HandleState(state);
 			if(state->station.stationState == DIALOG) {
-				DrawRectangle(100, 600, 1200, 200, GRAY);
-				DrawText(state->station.dialogue.displayMessage, 110, 610, 48, WHITE);
+				DrawRectangle(00, 600, WIDTH, 200, GRAY);
+				DrawText(state->station.dialogue.displayMessage, 10, 610, 48, WHITE);
 				if(strcmp(state->station.dialogue.speaker, SPEAKER_NARRATOR)) {
-					DrawRectangle(100, 600-32, 
+					DrawRectangle(00, 600-32, 
 							MeasureText(state->station.dialogue.speaker, 32) + 20,
 							32, GRAY);
-					DrawText(state->station.dialogue.speaker , 101, 600-32, 32, WHITE);
+					DrawText(state->station.dialogue.speaker , 01, 600-32, 32, WHITE);
 				}
 			}
 }
@@ -92,13 +102,44 @@ void CheckInteract(GameState* state) {
         case PROTAG_ROOM:
 			if(PDAY == 1) {
 				if(PFLAG[0] && !PFLAG[1]) {
-					INTERACTABLE(2, -46.5, 13.5, 35.5, 1'01'100);
+					INTERACTABLE(2, -46.5, 13.5, 35.5, 1'01'100); // PHONE (MANAGER)
 				}
+				if(PFLAG[1]) {
+					if(!PFLAG[2]) {
+						INTERACTABLE(-45, -32, 10.5, 17.5, 1'01'200); // DIARY
+						INTERACTABLE(-80.5, -44.5, 17.5, 43.5, 1'01'300); // TRANSITION TO MAIN HALLWAY
+					} else {
+						INTERACTABLE(-93, -44.5, 40.5, 43.5, 101); // TRANSITION TO MAIN HALLWAY
+					}
+				}
+			} else {
+				INTERACTABLE(-93, -44.5, 40.5, 43.5, 101); // TRANSITION TO MAIN HALLWAY
 			}
 			break;
         case MAIN_HALLWAY:
+			INTERACTABLE(-92, -44.5, 39.5, 44, 201);
+			INTERACTABLE(35, -45, 41, 45, 202);
+			INTERACTABLE(163, -45, 41, 45, 203);
+			INTERACTABLE(291, -45, 41, 45, 204);
+			INTERACTABLE(-44, -37, 17, 12, 1'02'001);
+			INTERACTABLE(84, -37, 17, 12, 1'02'100);
+			INTERACTABLE(212, -37, 17, 12, 1'02'200);
+			INTERACTABLE(340, -37, 17, 12, 1'02'300);
+			break;
         case SHIP_BOARDING:
+			INTERACTABLE(-93, -45, 41, 44.5, 401);  // DOOR TO MAIN_HALLWAY
+			break;
         case CAFETERIA:
+			INTERACTABLE(-93, -45, 41, 44.5, 301);  // DOOR TO MAIN_HALLWAY
+			if(!PFLAG[3]) {
+				INTERACTABLE(67, -36, 29, 15, 1'04'000); // FOOD DISPENSER (SHITTY)
+			}
+			else {
+				INTERACTABLE(67, -36, 29, 15, 1'04'006); // FOOD DISPENSER (SHITTY)
+			}
+			INTERACTABLE(116, -37, 17, 12, 1'04'100); // BACKROOM SIGN
+			INTERACTABLE(147, -45, 41, 44.5, 1'04'200); // BACKROOM DOOR (LOCKED DIALOGUE)
+			break;
         case MANAGERS_OFFICE:
           break;
         case INTRO:
