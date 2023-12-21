@@ -30,7 +30,8 @@ void DrawStation(GameState* state) {
 			DrawTexture(state->textures.cafeteria, -112, -112, WHITE);
 			break;
         case MANAGERS_OFFICE:
-          break;
+			DrawTexture(state->textures.shipBoarding, -112, -112, WHITE);
+    		break;
         case INTRO:
 		  DrawRectangle(0, 0, 2000, 2000, BLACK);
           break;
@@ -51,6 +52,9 @@ void DoStation(GameState* state, Camera2D* stationCam) {
 				state->station.stationLevel == MAIN_HALLWAY ||
 				state->station.stationLevel == CAFETERIA) {
 				stationCam->target.x = state->station.playerPosition.x;
+			}
+			if(state->station.stationLevel == SHIP_BOARDING) {
+				stationCam->target.x = 25;
 			}
 			BeginMode2D(*stationCam);
 				DrawStation(state);
@@ -74,12 +78,20 @@ void DoStation(GameState* state, Camera2D* stationCam) {
 			if(state->station.stationState == DIALOG) {
 				DrawRectangle(00, 600, WIDTH, 200, GRAY);
 				DrawText(state->station.dialogue.displayMessage, 10, 610, 48, WHITE);
-				if(strcmp(state->station.dialogue.speaker, SPEAKER_NARRATOR)) {
+				if(strcmp(state->station.dialogue.speaker, SPEAKER_NARRATOR)) { // if ssdp != SPEAKER_NARRATOR
 					DrawRectangle(00, 600-32, 
 							MeasureText(state->station.dialogue.speaker, 32) + 20,
 							32, GRAY);
 					DrawText(state->station.dialogue.speaker , 01, 600-32, 32, WHITE);
 				}
+				if(state->station.dialogue.readyToAdvance)
+					DrawTexturePro(
+							state->textures.button_e,
+							{0,0,16,16},
+							{WIDTH-64, 600-64, 64,64},
+							{0,0},
+							0,
+							WHITE);
 			}
 }
 
@@ -109,7 +121,7 @@ void CheckInteract(GameState* state) {
 						INTERACTABLE(-45, -32, 10.5, 17.5, 1'01'200); // DIARY
 						INTERACTABLE(-80.5, -44.5, 17.5, 43.5, 1'01'300); // TRANSITION TO MAIN HALLWAY
 					} else {
-						INTERACTABLE(-93, -44.5, 40.5, 43.5, 101); // TRANSITION TO MAIN HALLWAY
+						INTERACTABLE(-80.5, -44.5, 17.5, 43.5, 101); // TRANSITION TO MAIN HALLWAY
 					}
 				}
 			} else {
@@ -119,8 +131,17 @@ void CheckInteract(GameState* state) {
         case MAIN_HALLWAY:
 			INTERACTABLE(-92, -44.5, 39.5, 44, 201);
 			INTERACTABLE(35, -45, 41, 45, 202);
-			INTERACTABLE(163, -45, 41, 45, 203);
-			INTERACTABLE(291, -45, 41, 45, 204);
+			if(PDAY == 2) {
+				INTERACTABLE(163, -45, 41, 45, 203);
+			} else { 
+				INTERACTABLE(163, -45, 41, 45, 203);
+			}
+			if(PFLAG[3]) {
+				INTERACTABLE(291, -45, 41, 45, 204);
+			} else  {
+				INTERACTABLE(291, -45, 41, 45, 1'02'400);
+			}
+
 			INTERACTABLE(-44, -37, 17, 12, 1'02'001);
 			INTERACTABLE(84, -37, 17, 12, 1'02'100);
 			INTERACTABLE(212, -37, 17, 12, 1'02'200);
@@ -128,13 +149,15 @@ void CheckInteract(GameState* state) {
 			break;
         case SHIP_BOARDING:
 			INTERACTABLE(-93, -45, 41, 44.5, 401);  // DOOR TO MAIN_HALLWAY
+			INTERACTABLE(-9, -39, 19, 39, 1'03'000);
+			INTERACTABLE(50, -45, 44, 29, 1'03'100);
+			INTERACTABLE(99, -45, 41, 45, 1'03'200);
 			break;
         case CAFETERIA:
 			INTERACTABLE(-93, -45, 41, 44.5, 301);  // DOOR TO MAIN_HALLWAY
 			if(!PFLAG[3]) {
 				INTERACTABLE(67, -36, 29, 15, 1'04'000); // FOOD DISPENSER (SHITTY)
-			}
-			else {
+			} else {
 				INTERACTABLE(67, -36, 29, 15, 1'04'006); // FOOD DISPENSER (SHITTY)
 			}
 			INTERACTABLE(116, -37, 17, 12, 1'04'100); // BACKROOM SIGN

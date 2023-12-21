@@ -54,7 +54,8 @@ void DoTitle(GameState* state) {
 	DrawText(
 			"Instructions:\n"
 			"(A/D) or (Left Arrow/Right Arrow) to walk\n"
-			"(E) to interact with an object when prompted\n"
+			"(E) to interact with an object or when prompted\n"
+			"(R) to 'fast-forward' dialogue\n"
 			"Additional instructions will be given out in-game."
 			, 0, HEIGHT/2, 12, RAYWHITE);
 
@@ -223,13 +224,37 @@ void HandleState(GameState * state) {
 				}
 			}
 			ship->shipRotation += ship->shipRotVelo;
+			if(ship->shipRotation > 360 * DEG2RAD) {
+				while(ship->shipRotation > 360 * DEG2RAD) 
+					ship->shipRotation -= 360 * DEG2RAD;
+			}
+			if(ship->shipRotation < 360 * DEG2RAD) {
+				while(ship->shipRotation < 360 * DEG2RAD) 
+					ship->shipRotation += 360 * DEG2RAD;
+			}
 			ship->shipPosition = Vector2Add(ship->shipPosition, ship->shipVelocity);
 
 			if(ship->asteroids.empty()) {
 				if(CheckCollisionSpheres(Vector2to3XZ(ship->shipPosition), 1,
 							{0,0,-1}, 1)) {
+					// TODO: Rewrite to consider state.story
+					// In the future,add sub-states for 
+					// ship state, mainly for transitions and such. 
+					// maybe also finish that new station model you were cooking up
+					// in blender
 					if(!state->transition.active) {
-						transitionToStationLevel(state, TEST_LEVEL);
+						if(PDAY != 3) {
+							switch(PDAY) {
+								case 1:
+									PFLAG[4] = true;
+									break;
+								case 2: 
+								case 3: 
+									break;
+							}
+							PSETPLAYERPOS(125.82);
+							transitionToStationLevel(state, SHIP_BOARDING);
+						}
 					}
 				}
 			}

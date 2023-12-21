@@ -25,9 +25,9 @@
 #define MAN_SPRITE_WALK2_SOURCE {32, 32, 32, 32}
 
 #ifdef PLATFORM_WEB
-#define KEY_E_SOURCE {0, 0, 32, 32}
+#define KEY_E_SOURCE {0, 0, 16, 16}
 #else
-#define KEY_E_SOURCE {900, 32, 16, 16}
+#define KEY_E_SOURCE {0, 0, 16, 16}
 #endif
 
 #define PFLAG state->story.flags
@@ -56,7 +56,7 @@ if(state->station.playerPosition.x >= MAX)\
 			if(CheckCollisionRecs({stationPlyPos.x - 23.0f, stationPlyPos.y - 32, 32, 3}, \
 						{X,Y,W,H})) { \
 				if(state->station.stationState != DIALOG) \
-					DrawTexturePro(state->textures.buttons, KEY_E_SOURCE, \
+					DrawTexturePro(state->textures.button_e, KEY_E_SOURCE, \
 							{X + (W/2), Y-16, 16, 16},  \
 							{8, 0}, 0, WHITE); \
 				if(DIALOGCHECK) { \
@@ -85,6 +85,13 @@ enum GAME_STATE {
 	STATE_SHIP,
 };
 
+// mainly used for transitions between station and ship gameplay states.
+enum SHIP_SUBSTATE {
+	SST_DESCEND,
+	SST_ACTION,
+	SST_ASCEND
+};
+
 enum STATION_STATE {
 	WALK,
 	DIALOG,
@@ -108,7 +115,8 @@ enum ON_TRANSITION_PEAK {
 	STATION_LEVEL_TO_LEVEL,
 };
 
-struct ShipAsteroid;
+struct ShipAsteroid; // "prototyped" to avoid a compile error
+
 struct GameState {
 	GAME_STATE gameState;
 	struct { // station
@@ -147,7 +155,9 @@ struct GameState {
 		int originalAsteroidsSize;
 	} ship;
 	struct {
-		Texture buttons;
+		Texture button_e;
+		Texture button_r;
+
 		Texture basePlayer;
 
 		Texture testRoom;

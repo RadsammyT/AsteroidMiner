@@ -366,7 +366,7 @@ void undertale(GameState* state, int dialog) {
 				);
 			break;
 
-		case 1'02'100: // protag room sign 
+		case 1'02'100: // cafeteria  room sign 
 			DIALOG(
 					SPEAKER_NARRATOR,
 					"\"Cafeteria\".",
@@ -374,7 +374,7 @@ void undertale(GameState* state, int dialog) {
 				);
 			break;
 
-		case 1'02'200: // protag room sign 
+		case 1'02'200: // manager room sign 
 			DIALOG(
 					SPEAKER_NARRATOR,
 					"\"Financial Peril Program Manager's office and" LINE 
@@ -383,12 +383,47 @@ void undertale(GameState* state, int dialog) {
 				);
 			break;
 
-		case 1'02'300: // protag room sign 
+		case 1'02'300: // ship room sign 
 			DIALOG(
 					SPEAKER_NARRATOR,
 					"\"Station Spaceport\".", 
 					false
 				);
+			break;
+
+		case 1'02'400:
+			DIALOG(
+					SPEAKER_NARRATOR,
+					"Not now, I'm hungry.",
+					false
+				  );
+			break;
+
+		case 1'03'000:
+			DIALOG(
+					SPEAKER_NARRATOR,
+					"Test",
+					false
+				  );
+			break;
+
+		case 1'03'100:
+			DIALOG(
+					SPEAKER_NARRATOR,
+					"I try peer through the window, but its dark inside.",
+					false
+				  );
+				break;
+
+		case 1'03'200:
+				DIALOG(
+						SPEAKER_NARRATOR,
+						"I go through the airlock and board the ship.",
+						true
+					  );
+				break;
+		case 1'03'201:
+			transitionToShip(state, 4);
 			break;
 
 		case 1'04'000: // the food dispenser thing 

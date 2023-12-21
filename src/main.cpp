@@ -42,9 +42,11 @@ int main() {
 	state.transition = {};
 	state.station.anim.currentCycle = 3;
 #ifdef PLATFORM_WEB
-	state.textures.buttons = LoadTexture("resources/web/e_button.png");
+	state.textures.button_e = LoadTexture("resources/web/e_button.png");
+	state.textures.button_r = LoadTexture("resources/web/r_button.png");
 #else
-	state.textures.buttons = LoadTexture("resources/tilemap_white.png");
+	state.textures.button_e = LoadTexture("resources/web/e_button.png");
+	state.textures.button_r = LoadTexture("resources/web/r_button.png");
 #endif
 	state.textures.basePlayer = LoadTexture("resources/web/manBase.png");
 
@@ -213,7 +215,7 @@ int main() {
 	rlImGuiShutdown();
 	UnloadTexture(testTex);
 #endif
-	UnloadTexture(state.textures.buttons);
+	UnloadTexture(state.textures.button_e);
 	CloseAudioDevice();
 	CloseWindow();
 }
