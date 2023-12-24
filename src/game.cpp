@@ -3,6 +3,7 @@
 #include <cstring>
 
 #include <raylib.h>
+#include <raymath.h>
 
 Vector3 rotation = {};
 
@@ -19,7 +20,7 @@ void DoTitle(GameState* state) {
 	// Title and Menu Buttons
 	ClearBackground(BLACK);
 	BeginMode3D(cam);
-		DrawModelEx(state->models.size5Ast,
+		DrawModelEx(state->models.size5AstBurrowed,
 				{0, 0, 0},
 				rotation,
 				GetTime() * 10,
@@ -45,7 +46,7 @@ void DoTitle(GameState* state) {
 
 	DrawText(
 			"Credts:\n\n"
-			"Asteroid Models by Albert Buscio on Sketchfab\n"
+			"Asteroid Models (original and modified) by Albert Buscio on Sketchfab\n"
 			"Sci-Fi platform tiles by Eris on OpenGameArt.org\n"
 			"Phone Ring SFX by timgormly on Freesound\n"
 			"Footsteps SFX by EVRetro on Freesound\n"
@@ -65,7 +66,7 @@ void DoTitle(GameState* state) {
 	}
 }
 
-void HandleState(GameState * state) {
+void HandleState(GameState * state, Camera3D* cam) {
 	if(state->gameState == GAME_STATE::STATE_STATION) {
 		if(state->transition.active) {
 			state->transition.transitionTime -= GetFrameTime();
@@ -73,7 +74,7 @@ void HandleState(GameState * state) {
 					&& state->transition.transitionTime <= 0.0
 					&& !state->transition.atPeak) {
 				state->transition.atPeak = true;
-				onTransitionPeak(state);
+				onTransitionPeak(state, cam);
 			} else {
 				state->transition.atPeak = false;
 			}
@@ -81,7 +82,7 @@ void HandleState(GameState * state) {
 					-state->transition.maxTransitionTime) {
 				state->transition.active = false;
 			}
-		} else if(state->station.stationState == STATION_STATE::WALK) {
+		} else if(state->station.stationState == STATION_SUBSTATE::WALK) {
 			if(IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT)) {
 				state->station.playerPosition.x -= WALK_SPEED * GetFrameTime();
 				state->station.anim.direction = 0;
@@ -109,7 +110,7 @@ void HandleState(GameState * state) {
 				state->station.anim.timeToNextCycle = ANIM_SPEED;
 			}
 		}
-		if(state->station.stationState == STATION_STATE::DIALOG) {
+		if(state->station.stationState == STATION_SUBSTATE::DIALOG) {
 			if(IsKeyPressed(KEY_R)) {
 				state->station.dialogue.chars = state->station.dialogue.maxChars - 1;
 			}
@@ -145,15 +146,21 @@ void HandleState(GameState * state) {
 				}
 			}
 		}
+		// for sleep state, see station.cpp:78
 	}
 
 	if(state->gameState == GAME_STATE::STATE_SHIP) {
+		if(cam == NULL) {
+			TraceLog(LOG_ERROR, "HandleState: Cam is NULL!\n");
+			return;
+		}
 		if(state->transition.active) {
 			state->transition.transitionTime -= GetFrameTime();
-			if((int)state->transition.transitionTime == 0
+			if(state->transition.transitionTime >= -0.1
+					&& state->transition.transitionTime <= 0.0
 					&& !state->transition.atPeak) {
 				state->transition.atPeak = true;
-				onTransitionPeak(state);
+				onTransitionPeak(state, cam);
 			} else {
 				state->transition.atPeak = false;
 			}
@@ -161,8 +168,9 @@ void HandleState(GameState * state) {
 					-state->transition.maxTransitionTime) {
 				state->transition.active = false;
 			}
-		}  else {
-			auto ship = &state->ship;
+		}   
+		auto ship = &state->ship;
+		if(state->ship.state == SHIP_SUBSTATE::SST_ACTION) {
 			if(IsKeyDown(KEY_D)) {
 				ship->shipRotVelo -= 0.1 * GetFrameTime();
 			}
@@ -197,12 +205,14 @@ void HandleState(GameState * state) {
 							state->debug.laserCollide = lerpped;
 #else 
 						
-		if(CheckCollisionPointCircle(lerpped, ship->asteroids[i].pos, ship->asteroids[i].getSphereRad())) { 
+		if(C	heckCollisionPointCircle(lerpped, ship->asteroids[i].pos, ship->asteroids[i].getSphereRad())) { 
 #endif
 							ship->asteroids[i].lasered = true;
 							ship->asteroids[i].durability -= 1 * GetFrameTime();
-							ship->asteroids[i].size = (int)ship->asteroids[i].durability;
-							if(ship->asteroids[i].size == 0) {
+							if(!ship->asteroids[i].burrowed)
+								ship->asteroids[i].size = (int)ship->asteroids[i].durability;
+							if(ship->asteroids[i].size == 0 || 
+									ship->asteroids[i].durability <= 0) {
 								ship->asteroids.erase(ship->asteroids.begin() + i);
 							}
 							break;
@@ -225,12 +235,10 @@ void HandleState(GameState * state) {
 			}
 			ship->shipRotation += ship->shipRotVelo;
 			if(ship->shipRotation > 360 * DEG2RAD) {
-				while(ship->shipRotation > 360 * DEG2RAD) 
-					ship->shipRotation -= 360 * DEG2RAD;
+				ship->shipRotation -= 360 * DEG2RAD;
 			}
-			if(ship->shipRotation < 360 * DEG2RAD) {
-				while(ship->shipRotation < 360 * DEG2RAD) 
-					ship->shipRotation += 360 * DEG2RAD;
+			if(ship->shipRotation < 0 * DEG2RAD) {
+				ship->shipRotation += 360 * DEG2RAD;
 			}
 			ship->shipPosition = Vector2Add(ship->shipPosition, ship->shipVelocity);
 
@@ -242,24 +250,69 @@ void HandleState(GameState * state) {
 					// ship state, mainly for transitions and such. 
 					// maybe also finish that new station model you were cooking up
 					// in blender
+					/*
 					if(!state->transition.active) {
 						if(PDAY != 3) {
 							switch(PDAY) {
 								case 1:
 									PFLAG[4] = true;
+									transitionToStationLevel(state, SHIP_BOARDING, 1, 1'03'300);
+									PSETPLAYERPOS(127.82);
 									break;
 								case 2: 
 								case 3: 
 									break;
 							}
-							PSETPLAYERPOS(125.82);
-							transitionToStationLevel(state, SHIP_BOARDING);
+						}
+					}
+					*/
+					state->ship.state = SHIP_SUBSTATE::SST_ASCEND;
+					state->ship.ascensionLerp = 0;
+					state->ship.originalReturnPos = cam->position;
+				}
+			}
+		} else if(ship->state == SHIP_SUBSTATE::SST_ASCEND) {
+			if(state->ship.ascensionState == 0) {
+				state->ship.ascensionLerp += 1 * GetFrameTime();
+				Vector3 lerpped = Vector3Lerp(state->ship.originalReturnPos, {0, 0, 0}, state->ship.ascensionLerp);
+				cam->position = lerpped;
+				state->ship.ascensionLerp += (1/3) * GetFrameTime();
+				if(state->ship.ascensionLerp >= 1) {
+					state->ship.ascensionState = 1;
+				}
+			}
+			if(state->ship.ascensionState == 1) {
+				cam->position.y += 1 * GetFrameTime();
+				float x = std::sin(state->ship.shipRotation) * DEG2RAD;
+				float z = std::cos(state->ship.shipRotation) * DEG2RAD;
+				cam->target = {x, cam->position.y, z};
+				if(!state->transition.active) {
+					if(PDAY != 3) {
+						switch(PDAY) {
+							case 1:
+								PFLAG[4] = true;
+								transitionToStationLevel(state, SHIP_BOARDING, 1, 1'03'300);
+								state->transition.maxTransitionTime = 5;
+								state->transition.transitionTime = 5;
+								PSETPLAYERPOS(127.82);
+								break;
+							case 2: 
+							case 3: 
+								break;
 						}
 					}
 				}
 			}
+		} else if(ship->state == SHIP_SUBSTATE::SST_DESCEND) {
+			cam->position.y -= 1 * GetFrameTime();
+			cam->target = {0, cam->position.y, 1};
+			if(cam->position.y <= 0) {
+				cam->position.y = 0;
+				ship->state = SHIP_SUBSTATE::SST_ACTION;
+			}
 		}
-	}
+	} 
+	
 }
 void writeToCharArr(const char* in, char * arr, int limit) { // where limit defaults to -1
 	if(limit == -1) {
@@ -273,8 +326,9 @@ void writeToCharArr(const char* in, char * arr, int limit) { // where limit defa
 	}
 }
 
-void onTransitionPeak(GameState *state) {
+void onTransitionPeak(GameState *state, Camera3D* cam) {
 	switch(state->transition.onPeak) {
+		case ON_TRANSITION_PEAK::SHIP_TO_STATION:
 		case ON_TRANSITION_PEAK::STATION_LEVEL_TO_LEVEL:
 			state->gameState = STATE_STATION;
 			state->station.stationLevel = (STATION_LEVEL)state->transition.toLevel;
@@ -284,7 +338,13 @@ void onTransitionPeak(GameState *state) {
 			}
 			break;
 		case ON_TRANSITION_PEAK::STATION_TO_SHIP:
+			cam->position = {0, 5, 0};
+			cam->target = {0, cam->position.y, 1};
 			state->gameState = STATE_SHIP;
+			state->ship.shipVelocity = Vector2Zero();
+			state->ship.shipRotVelo = 0;
+			state->ship.shipPosition = {0,0};
+			state->ship.shipRotation = 0;
 			break;
 	}
 }

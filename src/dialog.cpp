@@ -8,6 +8,8 @@
 
 #define LINE "\n\n\n\n"
 
+// god save your soul for what you are about to witness
+
 void undertale(GameState* state, int dialog) {
 	state->station.stationState = DIALOG;
 	writeToCharArr("\0", SSDP.displayMessage, -1);
@@ -41,7 +43,8 @@ void undertale(GameState* state, int dialog) {
 			DIALOG(SPEAKER_NARRATOR, "You go through the airlock and board the ship.", true);
 			break;
 		case 9:
-			transitionToShip(state, 2);
+			ENDDIALOGUEP;
+			transitionToShip(state, 1, 1);
 			break;
 		case 10:
 			DIALOG("You", "It also smells.                    " LINE
@@ -55,6 +58,10 @@ void undertale(GameState* state, int dialog) {
 			break;
 		case 201: // from MAIN_HALLWAY to PROTAG_ROOM
 			transitionToStationLevel(state, PROTAG_ROOM);
+			PSETPLAYERPOS(-65.84);
+			break;
+		case 201'1:
+			transitionToStationLevel(state, PROTAG_ROOM, true, 1'01'500);
 			PSETPLAYERPOS(-65.84);
 			break;
 		case 202: // from MAIN_HALLWAY to CAFETERIA 
@@ -78,6 +85,7 @@ void undertale(GameState* state, int dialog) {
 			break;
 
 		//STORY DIALOG 
+		//where case numbers are X'XX'XXX
 		// case num formatting: X = day num, XX = room num (see level enum), XXX = dialog num
 		// jumps in the XXX by a 100 indicate a new dialog-line
 		case 1'00'000:
@@ -124,7 +132,7 @@ void undertale(GameState* state, int dialog) {
 							"I probably should answer it.", false);
 			break;
 		case 1'01'100:
-			DIALOG(SPEAKER_NARRATOR, "I pickup the phone and hold the reciever" LINE 
+			DIALOG(SPEAKER_NARRATOR, "I pickup the phone and hold the receiver" LINE 
 									 "next to my ear.", true);
 			PFLAG[1] = true;
 			break;
@@ -356,7 +364,83 @@ void undertale(GameState* state, int dialog) {
 			break;
 
 
+		case 1'01'400:
+			DIALOG(
+					SPEAKER_NARRATOR,
+					"I lie myself down onto the metal plate and sleep.",
+					true
+				  );
+			PFLAG[5] = true;
+			break;
 
+		case 1'01'401:
+			transitionToSleep(state);
+			state->story.day = 2;
+			break;
+
+		case 1'01'500:
+			DIALOG(
+					SPEAKER_NARRATOR,
+					"*RING RING RING*",
+					true
+				  );
+			PFLAG[1] = false;
+			break;
+
+		case 1'01'501:
+			DIALOG(
+					SPEAKER_NARRATOR,
+					"Its the Manager again. Might as well answer.",
+					false
+				  );
+			break;
+
+		case 1'01'601:
+			DIALOG(
+					SPEAKER_NARRATOR,
+					"I pickup the phone and hold the receiver next to" LINE 
+					"my ear.",
+					true
+				  );
+			PFLAG[1] = true;
+			break;
+		case 1'01'602:
+			DIALOG(
+					"Phone (Manager)",
+					"Finally. Took you long enough.",
+					true
+				  );
+			break;
+		case 1'01'603:
+			DIALOG(
+					"Phone (Manager)",
+					"Not bad for your first day. Shifts over for today." LINE 
+					"So is the day.",
+					true
+				  );
+			break;
+		case 1'01'604:
+			DIALOG(
+					SPEAKER_NARRATOR,
+					"The Manager quickly hung up after that.",
+					true
+				  );
+			break;
+
+		case 1'01'605:
+			DIALOG(
+					SPEAKER_NARRATOR,
+					"Guess its time to sleep.",
+					false
+				  );
+			break;
+		case 1'01'700:
+			DIALOG(
+					SPEAKER_NARRATOR,
+					"I'm tired.",
+					false
+				  )
+				break;
 		case 1'02'001: // protag room sign 
 			DIALOG(
 					SPEAKER_NARRATOR,
@@ -399,10 +483,19 @@ void undertale(GameState* state, int dialog) {
 				  );
 			break;
 
+		case 1'02'500: // managers office door 
+			DIALOG(
+					SPEAKER_NARRATOR,
+					"I try to open the airlock, but this one wouldn't budge.",
+					false
+				  );
+			break;
+
 		case 1'03'000:
 			DIALOG(
 					SPEAKER_NARRATOR,
-					"Test",
+					"A locker, labelled \"SPACESUIT\". I open it only to find" LINE
+					"nothing inside.",
 					false
 				  );
 			break;
@@ -410,7 +503,8 @@ void undertale(GameState* state, int dialog) {
 		case 1'03'100:
 			DIALOG(
 					SPEAKER_NARRATOR,
-					"I try peer through the window, but its dark inside.",
+					"I peer through the window, and see an expansive interior" LINE 
+					"with the ship stationed in the middle.",
 					false
 				  );
 				break;
@@ -423,7 +517,18 @@ void undertale(GameState* state, int dialog) {
 					  );
 				break;
 		case 1'03'201:
-			transitionToShip(state, 4);
+			transitionToShip(state, 3, 1);
+			ENDDIALOGUEP;
+			break;
+
+		case 1'03'300:
+			DIALOG(
+					SPEAKER_NARRATOR,
+					"Well, with that now done, I should probably sleep for the" LINE 
+					"night. Or day.",
+					false
+				  );
+
 			break;
 
 		case 1'04'000: // the food dispenser thing 

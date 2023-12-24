@@ -83,7 +83,13 @@ int main() {
 	state.models.size2Ast = LoadModel("resources/web/asteroid2.obj");
 	state.models.size1Ast = LoadModel("resources/web/asteroid1.obj");
 
-	state.models.station = LoadModel("resources/web/station.obj");
+	state.models.size5AstBurrowed = LoadModel("resources/web/asteroid5_burrowed.obj");
+	state.models.size4AstBurrowed = LoadModel("resources/web/asteroid4_burrowed.obj");
+	state.models.size3AstBurrowed = LoadModel("resources/web/asteroid3_burrowed.obj");
+	state.models.size2AstBurrowed = LoadModel("resources/web/asteroid2_burrowed.obj");
+	state.models.size1AstBurrowed = LoadModel("resources/web/asteroid1_burrowed.obj");
+
+	state.models.station = LoadModel("resources/web/new_station.obj");
 
 	state.sounds.phoneRing = LoadSound("resources/web/phone_low.wav");
 
@@ -93,7 +99,7 @@ int main() {
 				DoTitle(&state);
 			}
 			if(state.gameState == GAME_STATE::STATE_STATION) {
-				DoStation(&state, &stationCam);
+				DoStation(&state, &stationCam, &shipCam);
 			}
 			if(state.gameState == GAME_STATE::STATE_SHIP) {
 				DoShip(&state, &shipCam);
@@ -124,6 +130,7 @@ int main() {
 						ImGui::Text("station player pos: %.02f %.02f", 
 								state.station.playerPosition.x, state.station.playerPosition.y);
 						ImGui::Text("station state: %d", state.station.stationState);
+						ImGui::Text("station level: %d", state.station.stationLevel);
 						ImGui::Checkbox("draw test tex",&drawTestTex);
 						ImGui::Checkbox("draw playerPos point", &drawplayerPosPoint);
 						if(drawTestTex) {

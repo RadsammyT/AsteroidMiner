@@ -1,12 +1,17 @@
-# Blender 4.0.2 MTL File: 'PS1_style_low poly asteroids.blend'
+# Blender 4.0.2 MTL File: 'asteroid5_burrowed.blend'
 # www.blender.org
 
 newmtl asteroid.001
-Ns 17.376032
-Ka 1.000000 1.000000 1.000000
 Ks 0.000000 0.000000 0.000000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 illum 1
+Pr 0.868182
+Pm 0.000000
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
 map_Kd asteroid_01.png
 map_d asteroid_01.png

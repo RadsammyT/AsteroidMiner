@@ -1,6 +1,8 @@
 #include "game.h"
+#include <cmath>
 #include <raylib.h>
 #include <cstring>
+#include <raymath.h>
 
 void DrawStation(GameState* state) {
 	switch(state->station.stationLevel) {
@@ -35,10 +37,10 @@ void DrawStation(GameState* state) {
         case INTRO:
 		  DrawRectangle(0, 0, 2000, 2000, BLACK);
           break;
-        }
+	}
 }
 
-void DoStation(GameState* state, Camera2D* stationCam) {
+void DoStation(GameState* state, Camera2D* stationCam, Camera3D* shipCam) {
 
 			if(PFLAG[0] && !PFLAG[1] && PDAY == 1) {
 				if(!IsSoundPlaying(state->sounds.phoneRing)) {
@@ -56,25 +58,50 @@ void DoStation(GameState* state, Camera2D* stationCam) {
 			if(state->station.stationLevel == SHIP_BOARDING) {
 				stationCam->target.x = 25;
 			}
-			BeginMode2D(*stationCam);
-				DrawStation(state);
+			if(state->station.stationState != STATION_SUBSTATE::SLEEPING) {
+				BeginMode2D(*stationCam);
+					DrawStation(state);
 #if DEBUG_MODE
-				DrawRectangleV({(float)(state->station.playerPosition.x-23),
-						state->station.playerPosition.y - 32},
-						{32,3},
-						{255, 0, 0, 64});
-				if(state->debug.drawTestRec) {
-					DrawRectangleRec(state->debug.testRec, {255, 0, 0, 128});
-				}
+					DrawRectangleV({(float)(state->station.playerPosition.x-23),
+							state->station.playerPosition.y - 32},
+							{32,3},
+							{255, 0, 0, 64});
+					if(state->debug.drawTestRec) {
+						DrawRectangleRec(state->debug.testRec, {255, 0, 0, 128});
+					}
 #endif
-				DrawPlayerTex(state);
-				CheckInteract(state);
-			EndMode2D();
+					DrawPlayerTex(state);
+					if(!state->transition.active)
+						CheckInteract(state);
+				EndMode2D();
+			} else {
+				state->station.sleep.time -= GetFrameTime();
+				if(state->station.sleep.time <= 0) {
+					state->station.stationState = STATION_SUBSTATE::WALK;
+					for(int i = 0; i < 32; i++)
+						state->story.flags[i] = 0;
+
+				}
+				auto sleepCam = state->station.sleep.cam;
+				float x = sin(GetTime());
+				float y = cos(GetTime());
+				state->station.sleep.cam.target = Vector3Add(sleepCam.position, {x, 0, y});
+				BeginMode3D(sleepCam);
+					for(auto i: state->station.sleep.asteroids) {
+						i.DrawAst(state, &sleepCam);
+					}
+				EndMode3D();
+				float meas = MeasureText("YOU ARE SLEEPING", 48);
+				DrawRectangle((WIDTH/2) - (meas/2), (HEIGHT/2)-24, meas, 48, BLACK);
+				DrawText("YOU ARE SLEEPING", (WIDTH/2)-(meas/2), (HEIGHT/2)-24, 48, {255,0,0,255});
+
+			}
 			if(state->transition.active) {
 				if(state->transition.transitionTime > 0)
 					DrawRectangle(0, 0, 2000,2000, BLACK);
 			}
-			HandleState(state);
+
+			HandleState(state, shipCam);
 			if(state->station.stationState == DIALOG) {
 				DrawRectangle(00, 600, WIDTH, 200, GRAY);
 				DrawText(state->station.dialogue.displayMessage, 10, 610, 48, WHITE);
@@ -114,27 +141,42 @@ void CheckInteract(GameState* state) {
         case PROTAG_ROOM:
 			if(PDAY == 1) {
 				if(PFLAG[0] && !PFLAG[1]) {
-					INTERACTABLE(2, -46.5, 13.5, 35.5, 1'01'100); // PHONE (MANAGER)
+					if(PFLAG[4]) {
+						INTERACTABLE(2, -46.5, 13.5, 35.5, 1'01'601); // PHONE (MANAGER)
+					} else {
+						INTERACTABLE(2, -46.5, 13.5, 35.5, 1'01'100); // PHONE (MANAGER)
+					}
 				}
 				if(PFLAG[1]) {
 					if(!PFLAG[2]) {
 						INTERACTABLE(-45, -32, 10.5, 17.5, 1'01'200); // DIARY
 						INTERACTABLE(-80.5, -44.5, 17.5, 43.5, 1'01'300); // TRANSITION TO MAIN HALLWAY
 					} else {
-						INTERACTABLE(-80.5, -44.5, 17.5, 43.5, 101); // TRANSITION TO MAIN HALLWAY
+						if(PFLAG[4]) {
+							INTERACTABLE(-80.5, -44.5, 17.5, 43.5, 1'01'700); // TRANSITION TO MAIN HALLWAY
+						} else {
+							INTERACTABLE(-80.5, -44.5, 17.5, 43.5, 101); // TRANSITION TO MAIN HALLWAY
+						}
 					}
+				}
+				if(PFLAG[4] && PFLAG[1]) {
+					INTERACTABLE(40, -45, 55, 16, 1'01'400);
 				}
 			} else {
 				INTERACTABLE(-93, -44.5, 40.5, 43.5, 101); // TRANSITION TO MAIN HALLWAY
 			}
 			break;
         case MAIN_HALLWAY:
-			INTERACTABLE(-92, -44.5, 39.5, 44, 201);
+			if(PFLAG[4]) {
+				INTERACTABLE(-92, -44.5, 39.5, 44, 201'1);
+			} else {
+				INTERACTABLE(-92, -44.5, 39.5, 44, 201);
+			}
 			INTERACTABLE(35, -45, 41, 45, 202);
 			if(PDAY == 2) {
 				INTERACTABLE(163, -45, 41, 45, 203);
 			} else { 
-				INTERACTABLE(163, -45, 41, 45, 203);
+				INTERACTABLE(163, -45, 41, 45, 1'02'500);
 			}
 			if(PFLAG[3]) {
 				INTERACTABLE(291, -45, 41, 45, 204);
@@ -185,11 +227,36 @@ void DrawPlayerTex(GameState *state) {
 			{32, 32}, 0.0f, WHITE);
 }
 
+void transitionToSleep(GameState *state) {
+	state->station.stationState = STATION_SUBSTATE::SLEEPING;
+	state->station.sleep.time = 10;
+	for(int i = 0; i < 50; i++) {
+		int tempSize = (rand() % 5) + 1;
+		state->station.sleep.asteroids.push_back(ShipAsteroid {
+			.pos = {(float)(rand() % 200) - 100,(float)(rand() % 200) - 100},
+			.velocity = {0,0},
+			.cosAsteroidRotation = {RAND_FLOAT, RAND_FLOAT, RAND_FLOAT},
+			.size = tempSize,
+			.durability = (float)tempSize + 0.9f,
+		});
+	}
+	state->station.sleep.cam = {
+		.position = {0,0,0},
+		.target = {0,0,0},
+		.up = {0,1,0},
+		.fovy = 90.0f,
+		.projection = CameraProjection::CAMERA_PERSPECTIVE,
+	};
+}
+
 void transitionToStationLevel(GameState *state, int level, bool dialogAfter, int dialogNum) {
 	state->transition.active = true;
 	state->transition.maxTransitionTime = 1;
 	state->transition.transitionTime = 1;
-	state->transition.onPeak = STATION_LEVEL_TO_LEVEL;
+	if(state->gameState == STATE_STATION)
+		state->transition.onPeak = STATION_LEVEL_TO_LEVEL;
+	else if(state->gameState == STATE_SHIP)
+		state->transition.onPeak = SHIP_TO_STATION;
 	state->transition.toLevel = level;
 	state->transition.dialogAfter = dialogAfter;
 	state->transition.dialogNum = dialogNum;

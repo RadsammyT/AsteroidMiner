@@ -56,7 +56,6 @@ web:
 	-I. -I./raylib/raylib-5.0/src -Ilibs \
 	-L. -L./raylib/raylib-5.0/src -Llibs/out/web \
 	-s USE_GLFW=3 -s ASYNCIFY \
-	--shell-file ./raylib/raylib-5.0/src/shell.html \
 	--preload-file resources/web/ \
 	-s EXPORTED_RUNTIME_METHODS=ccall \
 	-DPLATFORM_WEB $(ADDITIONAL_FLAGS)

@@ -5,12 +5,18 @@
 #include "game.h"
 
 void DoShip(GameState *state, Camera3D *cam) {
+	if(cam == NULL) {
+		TraceLog(LOG_ERROR, "DoShip: Cam is NULL!\n");
+		return;
+	}
 	ClearBackground(BLACK);
-	HandleState(state);
+	HandleState(state, cam);
 	float x = std::sin(state->ship.shipRotation) * RAD2DEG;
 	float z = std::cos(state->ship.shipRotation) * RAD2DEG;
-	cam->position = {state->ship.shipPosition.x, 0, state->ship.shipPosition.y};
-	cam->target = {cam->position.x + x, 0, cam->position.z + z};
+	if(state->ship.state == SHIP_SUBSTATE::SST_ACTION) {
+		cam->position = {state->ship.shipPosition.x, 0, state->ship.shipPosition.y};
+		cam->target = {cam->position.x + x, 0, cam->position.z + z};
+	}
 	Frustum frus;
 
 	BeginMode3D(*cam);
@@ -25,7 +31,7 @@ void DoShip(GameState *state, Camera3D *cam) {
 #endif
 		// dock cube: 0, 0, -1.030 | 2, 1, 1
 	
-		DrawModel(state->models.station, {0, 0, -5}, 1.0f, WHITE);
+		DrawModel(state->models.station, {0, -1, 0}, 1.0f, WHITE);
 		for(auto i: state->ship.asteroids) {
 			i.DrawAst(state, cam);
 		}
@@ -108,17 +114,13 @@ void DoShip(GameState *state, Camera3D *cam) {
 			WIDTH - (200-32), (HEIGHT/2) - 50, 50, BLACK);
 	
 	if(state->transition.active) {
-		if(state->transition.transitionTime >= 0) {
-			if(state->ship.asteroids.size() == 0) {
-				float mod = state->transition.transitionTime / state->transition.maxTransitionTime;
-				DrawRectangle(0, 0, 2000,2000, {0,0,0,(unsigned char)(mod*255)});
-			} else {
-				DrawRectangle(0, 0, 2000,2000, BLACK);
-			}
+		if(state->transition.onPeak == STATION_TO_SHIP) {
+			float mod = state->transition.transitionTime / state->transition.maxTransitionTime;
+			DrawRectangle(0, 0, 2000,2000, {0,0,0,(unsigned char)(mod*255)});
 		}
-		else if(state->transition.transitionTime > -state->transition.maxTransitionTime) {
-			float mod = state->transition.maxTransitionTime + 
-				(state->transition.transitionTime - (state->transition.maxTransitionTime*2));
+		else if(state->transition.onPeak == SHIP_TO_STATION) {
+			float mod = abs(state->transition.transitionTime - state->transition.maxTransitionTime)
+				/ state->transition.maxTransitionTime;
 			DrawRectangle(0, 0, 2000, 2000, {0,0,0,(unsigned char)((float)mod*255)});
 		} else if(state->transition.transitionTime >= 0 && state->ship.asteroids.empty()) {
 
@@ -126,7 +128,7 @@ void DoShip(GameState *state, Camera3D *cam) {
 	}
 }
 
-void transitionToShip(GameState *state, int asteroidCount) {
+void transitionToShip(GameState *state, int asteroidCount, int burrowedCount) {
 	state->transition.active = true;
 	state->transition.maxTransitionTime = 1;
 	state->transition.transitionTime = 1;
@@ -139,8 +141,20 @@ void transitionToShip(GameState *state, int asteroidCount) {
 			.pos = {(float)(rand() % 200) - 100,(float)(rand() % 200) - 100},
 			.velocity = {0,0},
 			.cosAsteroidRotation = {RAND_FLOAT, RAND_FLOAT, RAND_FLOAT},
+			.burrowed = false,
 			.size = tempSize,
 			.durability = (float)tempSize + 0.9f,
+		});
+	}
+	for(int i = 0; i < burrowedCount; i++) {
+		int tempSize = (rand() % 5) + 1;
+		state->ship.asteroids.push_back(ShipAsteroid {
+			.pos = {(float)(rand() % 200) - 100,(float)(rand() % 200) - 100},
+			.velocity = {0,0},
+			.cosAsteroidRotation = {RAND_FLOAT, RAND_FLOAT, RAND_FLOAT},
+			.burrowed = true,
+			.size = tempSize,
+			.durability = 1 + 0.9f,
 		});
 	}
 }
@@ -155,23 +169,28 @@ void ShipAsteroid::DrawAst(GameState* state, Camera3D* cam) {
 	float radius = getSphereRad();
 	switch(size) {
 		case 1:
-			SETMODEL(model, &state->models.size1Ast);
+			if(burrowed) SETMODEL(model, &state->models.size1AstBurrowed);
+			else SETMODEL(model, &state->models.size1Ast);
 			divisor = 5;
 			break;
 		case 2:
-			SETMODEL(model, &state->models.size2Ast);
+			if(burrowed) SETMODEL(model, &state->models.size2AstBurrowed);
+			else SETMODEL(model, &state->models.size2Ast);
 			divisor = 4;
 			break;
 		case 3:
-			SETMODEL(model, &state->models.size3Ast);
+			if(burrowed) SETMODEL(model, &state->models.size3AstBurrowed);
+			else SETMODEL(model, &state->models.size3Ast);
 			divisor = 3;
 			break;
 		case 4:
-			SETMODEL(model, &state->models.size4Ast);
+			if(burrowed) SETMODEL(model, &state->models.size4AstBurrowed);
+			else SETMODEL(model, &state->models.size4Ast);
 			divisor = 2;
 			break;
 		case 5:
-			SETMODEL(model, &state->models.size5Ast);
+			if(burrowed) SETMODEL(model, &state->models.size4AstBurrowed);
+			else SETMODEL(model, &state->models.size4Ast);
 			divisor = 1;
 			break;
 		default:

@@ -92,9 +92,10 @@ enum SHIP_SUBSTATE {
 	SST_ASCEND
 };
 
-enum STATION_STATE {
+enum STATION_SUBSTATE {
 	WALK,
 	DIALOG,
+	SLEEPING, // squirrel stapler reference 
 };
 
 enum STATION_LEVEL {
@@ -121,7 +122,7 @@ struct GameState {
 	GAME_STATE gameState;
 	struct { // station
 		Vector2 playerPosition;
-		STATION_STATE stationState;
+		STATION_SUBSTATE stationState;
 		STATION_LEVEL stationLevel;
 		struct {
 			bool direction; // 0 = left, 1 = right
@@ -140,8 +141,16 @@ struct GameState {
 			bool readyToAdvance;
 			bool alreadyDisengaged;
 		} dialogue;
+		struct {
+			std::vector<ShipAsteroid> asteroids; 
+			Camera3D cam;
+			float maxTime; 
+			float time;
+			float rotation;
+		} sleep;
 	} station;
 	struct { // ship
+		SHIP_SUBSTATE state;
 		Vector2 shipPosition;
 		Vector2 shipVelocity;
 		float shipRotation;
@@ -153,6 +162,10 @@ struct GameState {
 
 		std::vector<ShipAsteroid> asteroids;
 		int originalAsteroidsSize;
+
+		Vector3 originalReturnPos;
+		float ascensionLerp;
+		int ascensionState = 0;
 	} ship;
 	struct {
 		Texture button_e;
@@ -172,6 +185,12 @@ struct GameState {
 	} textures;
 	struct {
 		Model errorFallback; // Used when something went wrong when determining a model 
+
+		Model size5AstBurrowed;
+		Model size4AstBurrowed;
+		Model size3AstBurrowed;
+		Model size2AstBurrowed;
+		Model size1AstBurrowed;
 
 		Model size5Ast;
 		Model size4Ast;
@@ -228,6 +247,7 @@ struct ShipAsteroid {
 	Vector2 pos;
 	Vector2 velocity;
 	Vector4 cosAsteroidRotation;
+	bool burrowed;
 	int size; // see GameState.models 
 
 	Model* model;
@@ -241,16 +261,17 @@ struct ShipAsteroid {
 void DoTitle(GameState*);
 
 void DrawStation(GameState*);
-void DoStation(GameState*, Camera2D*);
+void DoStation(GameState*, Camera2D*, Camera3D*);
 
 void DoShip(GameState*, Camera3D*);
 
 void CheckInteract(GameState*);
-void HandleState(GameState*);
+void HandleState(GameState*, Camera3D*);
 void undertale(GameState*, int);
-void transitionToShip(GameState*, int);
+void transitionToShip(GameState*, int, int);
 void transitionToStationLevel(GameState*, int, bool = false, int = -1);
-void onTransitionPeak(GameState*);
+void transitionToSleep(GameState*);
+void onTransitionPeak(GameState*, Camera3D*);
 
 void writeToCharArr(const char*, char*, int = -1);
 void DrawPlayerTex(GameState*);
