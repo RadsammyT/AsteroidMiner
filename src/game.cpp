@@ -50,6 +50,8 @@ void DoTitle(GameState* state) {
 			"Sci-Fi platform tiles by Eris on OpenGameArt.org\n"
 			"Phone Ring SFX by timgormly on Freesound\n"
 			"Footsteps SFX by EVRetro on Freesound\n"
+			"Door SFX (modified) by MicktheMicGuy on FreeSound\n"
+			""
 			, 0, 0, 12, RAYWHITE);
 
 	DrawText(

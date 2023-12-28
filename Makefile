@@ -49,7 +49,7 @@ web:
 	echo "---web---"
 	emcc src/*.cpp \
 	-o bin/web/AsteroidMiner.html \
-	-Os -Wall -std=c++20 \
+	-O3 -Wall -std=c++20 \
 	./raylib/raylib-5.0/src/libraylib.a \
 	./libs/out/web/librlimgui.a \
 	./libs/out/web/libfrustum.a \

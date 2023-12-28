@@ -218,8 +218,8 @@ int main() {
 						ImGui::TreePop();
 					}
 					if(ImGui::TreeNode("Transition")) {
-						ImGui::Text("active: %b", state.transition.active);
-						ImGui::Text("atPeak: %b", state.transition.atPeak);
+						ImGui::Text("active: %d", state.transition.active);
+						ImGui::Text("atPeak: %d", state.transition.atPeak);
 						ImGui::Text("transitionTime: %f", state.transition.transitionTime);
 						ImGui::Text("maxTransitionTime: %f", state.transition.maxTransitionTime);
 						ImGui::Text("onPeak: %d", state.transition.onPeak);

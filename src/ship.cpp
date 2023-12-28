@@ -123,8 +123,19 @@ void DoShip(GameState *state, Camera3D *cam) {
 	if(state->transition.active) {
 		if(state->transition.onPeak == STATION_TO_SHIP) {
 			// fade-out at descend
-			float mod = state->transition.transitionTime / state->transition.maxTransitionTime;
-			DrawRectangle(0, 0, 2000,2000, {0,0,0,(unsigned char)((float)mod*255)});
+			// the below commented declaration would make fade-out work on desktop, but not
+			// for web, as we are going to 0..-255. Casting to u8 (unsigned char) on desktop
+			// gets us 255..0 but on web, casting to u8 gets us constant 0s, which is why web
+			// transitions bugs out.
+			//float mod = state->transition.transitionTime / state->transition.maxTransitionTime;
+			float mod = (state->transition.transitionTime + 
+						state->transition.maxTransitionTime) 
+				/ (state->transition.maxTransitionTime);
+			DrawRectangle(0, 0, 2000,2000, {0,0,0,static_cast<unsigned char>(((float)mod*255))});
+#if DEBUG_MODE
+			DrawText(TextFormat("(%.01f | %d)", mod*255, (unsigned char)((float)mod*255)),
+					WIDTH/2, 0, 50, RED);
+#endif
 		}
 		else if(state->transition.onPeak == SHIP_TO_STATION) {
 			float mod = abs(state->transition.transitionTime - state->transition.maxTransitionTime)
