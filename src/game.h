@@ -44,6 +44,7 @@ if(state->station.playerPosition.x <= MIN)\
 if(state->station.playerPosition.x >= MAX)\
 {state->station.playerPosition.x = MAX;}
 
+#define DIALOG_TODO -1
 #define DIALOG(SPEAKER, MESSAGE, NEXTDIALOG)\
 			writeToCharArr(MESSAGE, state->station.dialogue.fullMessage);\
 			state->station.dialogue.maxChars = strlen(MESSAGE);\
@@ -85,11 +86,18 @@ enum GAME_STATE {
 	STATE_SHIP,
 };
 
+enum GAMEOVER_CAUSE {
+	OUTOFBOUNDS,
+	EXCESSIVESPIN,
+	OBJECTCOLLISION
+};
+
 // mainly used for transitions between station and ship gameplay states.
 enum SHIP_SUBSTATE {
 	SST_DESCEND,
 	SST_ACTION,
-	SST_ASCEND
+	SST_ASCEND,
+	SST_FAILED
 };
 
 enum STATION_SUBSTATE {
@@ -166,6 +174,12 @@ struct GameState {
 		Vector3 originalReturnPos;
 		float ascensionLerp;
 		int ascensionState = 0;
+		struct {
+			// monster should go to 0,0 (station) before going inactive
+			bool active;
+			Vector2 pos;
+			Vector2 posVel;
+		} monster;
 	} ship;
 	struct {
 		Texture button_e;
@@ -175,8 +189,12 @@ struct GameState {
 
 		Texture testRoom;
 		Texture protagRoom; 
+
 		Texture mainHall;
+		Texture mainHallDay2;
+
 		Texture cafeteria;
+		Texture managerRoom;
 		Texture shipBoarding;
 
 		Texture shipUiArrow;
@@ -206,6 +224,8 @@ struct GameState {
 		Sound doorClose;
 		Sound walkLeft;
 		Sound walkRight;
+
+		Sound explode;
 	} sounds;
 	struct {
 		bool active;
@@ -272,6 +292,7 @@ void transitionToShip(GameState*, int, int);
 void transitionToStationLevel(GameState*, int, bool = false, int = -1);
 void transitionToSleep(GameState*);
 void onTransitionPeak(GameState*, Camera3D*);
+void walkSound(GameState*);
 
 void writeToCharArr(const char*, char*, int = -1);
 void DrawPlayerTex(GameState*);

@@ -88,6 +88,13 @@ void DoShip(GameState *state, Camera3D *cam) {
 		float y = cos(angle + (180 * DEG2RAD));
 		DrawCircle(100 + (x * 80), 100 + (y * 80), (float)i.size*1.5, dist <= 2.5 + i.getSphereRad() ? RED : BLACK);
 	}
+	if(state->ship.asteroids.empty()) {
+		Vector2 pos = Vector2Subtract({0,0}, state->ship.shipPosition);
+		float angle = atan2(pos.x, pos.y);
+		float x = sin(angle + (180 * DEG2RAD));
+		float y = cos(angle + (180 * DEG2RAD));
+		DrawCircle(100 + (x * 80), 100 + (y * 80), (float)3*1.5, GREEN);
+	}
 
 	DrawRectangle(WIDTH-(200-40),
 			(200 - (200 * state->ship.airBreakCharge)) + 30,
@@ -115,15 +122,18 @@ void DoShip(GameState *state, Camera3D *cam) {
 	
 	if(state->transition.active) {
 		if(state->transition.onPeak == STATION_TO_SHIP) {
+			// fade-out at descend
 			float mod = state->transition.transitionTime / state->transition.maxTransitionTime;
-			DrawRectangle(0, 0, 2000,2000, {0,0,0,(unsigned char)(mod*255)});
+			DrawRectangle(0, 0, 2000,2000, {0,0,0,(unsigned char)((float)mod*255)});
 		}
 		else if(state->transition.onPeak == SHIP_TO_STATION) {
 			float mod = abs(state->transition.transitionTime - state->transition.maxTransitionTime)
 				/ state->transition.maxTransitionTime;
 			DrawRectangle(0, 0, 2000, 2000, {0,0,0,(unsigned char)((float)mod*255)});
 		} else if(state->transition.transitionTime >= 0 && state->ship.asteroids.empty()) {
-
+			#if 1
+			printf("FUCK\n");
+			#endif
 		}
 	}
 }
@@ -133,8 +143,9 @@ void transitionToShip(GameState *state, int asteroidCount, int burrowedCount) {
 	state->transition.maxTransitionTime = 1;
 	state->transition.transitionTime = 1;
 	state->transition.onPeak = STATION_TO_SHIP;
+	state->ship.state = SHIP_SUBSTATE::SST_DESCEND;
 
-	state->ship.originalAsteroidsSize = asteroidCount;
+	state->ship.originalAsteroidsSize = asteroidCount + burrowedCount;
 	for(int i = 0; i < asteroidCount; i++) {
 		int tempSize = (rand() % 5) + 1;
 		state->ship.asteroids.push_back(ShipAsteroid {

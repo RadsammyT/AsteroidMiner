@@ -89,6 +89,7 @@ void HandleState(GameState * state, Camera3D* cam) {
 				state->station.anim.timeToNextCycle -= GetFrameTime();
 				if(state->station.anim.timeToNextCycle < 0) {
 					state->station.anim.currentCycle++;
+					walkSound(state);
 					if(state->station.anim.currentCycle > 3) {
 						state->station.anim.currentCycle = 0;
 					}
@@ -100,6 +101,7 @@ void HandleState(GameState * state, Camera3D* cam) {
 				state->station.anim.timeToNextCycle -= GetFrameTime();
 				if(state->station.anim.timeToNextCycle < 0) {
 					state->station.anim.currentCycle++;
+					walkSound(state);
 					if(state->station.anim.currentCycle > 3) {
 						state->station.anim.currentCycle = 0;
 					}
@@ -287,19 +289,23 @@ void HandleState(GameState * state, Camera3D* cam) {
 				float z = std::cos(state->ship.shipRotation) * DEG2RAD;
 				cam->target = {x, cam->position.y, z};
 				if(!state->transition.active) {
-					if(PDAY != 3) {
-						switch(PDAY) {
-							case 1:
-								PFLAG[4] = true;
-								transitionToStationLevel(state, SHIP_BOARDING, 1, 1'03'300);
-								state->transition.maxTransitionTime = 5;
-								state->transition.transitionTime = 5;
-								PSETPLAYERPOS(127.82);
-								break;
-							case 2: 
-							case 3: 
-								break;
-						}
+					switch(PDAY) {
+						case 1:
+							PFLAG[4] = true;
+							transitionToStationLevel(state, SHIP_BOARDING, 1, 1'03'300);
+							state->transition.maxTransitionTime = 5;
+							state->transition.transitionTime = 5;
+							PSETPLAYERPOS(127.82);
+							break;
+						case 2: 
+							PFLAG[1] = true;
+							transitionToStationLevel(state, SHIP_BOARDING, 1, 2'04'100);
+							state->transition.maxTransitionTime = 5;
+							state->transition.transitionTime = 5;
+							PSETPLAYERPOS(127.82);
+							break;
+						case 3: 
+							break;
 					}
 				}
 			}

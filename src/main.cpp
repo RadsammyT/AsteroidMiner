@@ -53,7 +53,9 @@ int main() {
 	state.textures.testRoom = LoadTexture("resources/web/test_room_16.png");
 	state.textures.protagRoom = LoadTexture("resources/web/protag_room_furnished.png");
 	state.textures.mainHall = LoadTexture("resources/web/main_hall.png");
+	state.textures.mainHallDay2 = LoadTexture("resources/web/main_hall_day_2.png");
 	state.textures.cafeteria = LoadTexture("resources/web/cafe_furnished.png");
+	state.textures.managerRoom = LoadTexture("resources/web/manager_office_furnished.png");
 	state.textures.shipBoarding = LoadTexture("resources/web/ship_boarding_furnished.png");
 
 	state.textures.shipUiArrow = LoadTexture("resources/web/uiArrow.png");
@@ -89,9 +91,15 @@ int main() {
 	state.models.size2AstBurrowed = LoadModel("resources/web/asteroid2_burrowed.obj");
 	state.models.size1AstBurrowed = LoadModel("resources/web/asteroid1_burrowed.obj");
 
+	// note: if station model appears to be "inverted", as in faces only
+	// showing from the inside, invert all the face normals in blender, then
+	// re-export.
 	state.models.station = LoadModel("resources/web/new_station.obj");
 
 	state.sounds.phoneRing = LoadSound("resources/web/phone_low.wav");
+	state.sounds.walkLeft = LoadSound("resources/web/walk1.wav");
+	state.sounds.walkRight = LoadSound("resources/web/walk2.wav");
+	state.sounds.explode = LoadSound("asteroid_explosion.wav");
 
 	while(!WindowShouldClose()) {
 		BeginDrawing();
@@ -165,6 +173,15 @@ int main() {
 							ImGui::Text("nextDialog: %d", state.station.dialogue.nextDialog);
 							ImGui::Text("ready: %d", state.station.dialogue.readyToAdvance);
 							ImGui::Text("disengaged: %d", state.station.dialogue.alreadyDisengaged);
+							ImGui::TreePop();
+						}
+						if(ImGui::TreeNode("Animation/Sounds")) {
+							ImGui::Text("walkLeft is playing: %d", 
+									IsSoundPlaying(state.sounds.walkLeft));
+							ImGui::Text("walkRightis playing: %d", 
+									IsSoundPlaying(state.sounds.walkRight));
+							ImGui::Text("Current Walk Cycle: %d",
+									state.station.anim.currentCycle);
 							ImGui::TreePop();
 						}
 						ImGui::TreePop();

@@ -70,6 +70,7 @@ void undertale(GameState* state, int dialog) {
 			break;
 		case 203:
 			transitionToStationLevel(state, MANAGERS_OFFICE);
+			PSETPLAYERPOS(-67.51);
 			break;
 		case 204:
 			transitionToStationLevel(state, SHIP_BOARDING);
@@ -77,11 +78,15 @@ void undertale(GameState* state, int dialog) {
 			break;
 		case 301: // CAFETERIA to MAIN_HALLWAY
 			transitionToStationLevel(state, MAIN_HALLWAY);
-			PSETPLAYERPOS(62.51);
+			PSETPLAYERPOS(61.65);
 			break;
 		case 401: // SHIP_BOARDING to MAIN_HALLWAY
 			transitionToStationLevel(state, MAIN_HALLWAY);
 			PSETPLAYERPOS(317.67);
+			break;
+		case 501:
+			transitionToStationLevel(state, MAIN_HALLWAY);
+			PSETPLAYERPOS(190);
 			break;
 
 		//STORY DIALOG 
@@ -165,7 +170,11 @@ void undertale(GameState* state, int dialog) {
 									  "a little 'How to do your job for dummies'.", true);
 			break;
 		case 1'01'108:
-			DIALOG("Phone (Manager)", "Now read it before you eat, or else.", true);
+			DIALOG("Phone (Manager)",
+					"Before I forget, you have 4 to mine for your first" LINE 
+					"day."
+					" Now read it before you eat, or else.",
+					true);
 			break;
 		case 1'01'109:
 			DIALOG("You", "Cool, but where do I eat?", true);
@@ -194,7 +203,7 @@ void undertale(GameState* state, int dialog) {
 			DIALOG(
 					"Chapter 1/1: How to do your job",
 					"Greetings, volunteer! Welcome to the financial" LINE 
-					"peril relief program hosted by raycorp! We are" LINE 
+					"peril relief program offered by raycorp! We are" LINE 
 					"sincerely honored to have you work for us!", true);
 			PFLAG[2] = true;
 			break;
@@ -610,6 +619,195 @@ void undertale(GameState* state, int dialog) {
 					false
 				  );
 			break;
+
+		// DAY 2 DIALOGUE 
+		case 2'01'001:
+			DIALOG(
+					SPEAKER_NARRATOR,
+					"..." LINE "When is he calling?" LINE "I should get today over with.",
+					false
+				  );
+			break;
+
+		case 2'01'100:
+			DIALOG(
+					SPEAKER_NARRATOR,
+					"I lie down on the 'bed' and sleep.",
+					true
+				  );
+			break;
+
+		case 2'01'101:
+			transitionToSleep(state);
+			state->story.day = 3;
+			break;
+
+		case 2'01'200:
+			DIALOG(
+					SPEAKER_NARRATOR,
+					"I open the book, flip through the pages" LINE 
+					"to where I last left off, and read.",
+					true
+				  );
+			break;
+
+		case 2'01'201:
+			DIALOG(
+					"Book (Peter)",
+					"Writing this here because I couldn't vent" LINE 
+					"anywhere else- So while I was doing my shifts" LINE 
+					"mining asteroids for whatever reason, I dunno how-",
+					true
+				  );
+			break;
+
+		case 2'01'202:
+			DIALOG(
+					"Book (Peter)",
+					"but I saw one of them HALLOW, like a hole burrowed" LINE
+					"into the rock and its insides just gone, and only" LINE
+					"the 'shell' is left intact.",
+					true
+				  );
+			break;
+
+		case 2'01'203:
+			DIALOG(
+					"Book (Peter)",
+					"When I talked to the manager over the phone-" LINE
+					"who is always in his fucking room doing whatever-" LINE 
+					"he just brushed it off as me being lazy, somehow.",
+					true
+				  );
+			break;
+
+		case 2'01'204:
+			DIALOG(
+					"Book (Peter)",
+					"I tried to at least disillusion him, saying that" LINE 
+					"thats not how any of this works, but he hung up the" LINE 
+					"phone before I could at least get a valid argument in.",
+					true
+				  );
+			break;
+
+		case 2'01'205:
+			DIALOG(
+					"Book (Peter)",
+					"But SOMETHING is making these rocks be carved out" LINE 
+					"hollow, and its obviously not me. So if the manager" LINE
+					"is going hands-off on all of this...",
+					true
+				  );
+			break;
+
+		case 2'01'206:
+			DIALOG(
+					"Book (Peter)",
+					"Then I will simply figure this out myself. And once" LINE 
+					"I finally do, I want a raise. Even though he's going" LINE 
+					"to laugh it off like he always has.",
+					false
+				  );
+			break;
+
+		case 2'02'000:
+			DIALOG(
+					SPEAKER_NARRATOR,
+					"Something is wrong.",
+					false
+				  );
+			break;
+
+		case 2'03'000:
+			DIALOG(
+					SPEAKER_NARRATOR,
+					"Financial Peril Program Manager's dormitory.",
+					false
+				  );
+			break;
+
+		case 2'03'100:
+			DIALOG(
+					SPEAKER_NARRATOR,
+					"A laptop lies on a desk, open and on. From what" LINE 
+					"I see on the screen, only an email client is open" LINE
+					"on the laptop. 2 emails catch my eye, both recent.",
+					true
+				  );
+			break;
+
+		case 2'03'101:
+			DIALOG(
+					SPEAKER_NARRATOR,
+					"One had the subject of 'AUTO: FPRP QUOTA REMINDER'." LINE
+					"The contents are self-explanatory. I have 9 asteroids" LINE 
+					"to mine for today.",
+					true
+				  );
+			break; 
+
+		case 2'03'102:
+			DIALOG(
+					SPEAKER_NARRATOR,
+					"Another had a peculiar subject of 'Immediate" LINE 
+					"Evacuation Notice'. I try to read its contents" LINE 
+					"but before I could do so, the screen turns off.",
+					true
+				  );
+			break;
+
+		case 2'03'103:
+			DIALOG(
+					SPEAKER_NARRATOR,
+					"No amount of rapid-tapping its power button" LINE 
+					"would bring the laptop back on, not even" LINE 
+					"closing and opening the laptop worked.",
+					true
+				  );
+			break;
+
+		case 2'03'104:
+			DIALOG(
+					SPEAKER_NARRATOR,
+					"At least I know my quota for today." LINE 
+					"I wonder what was up with the Evacuation" LINE 
+					"email, though.",
+					false
+				  );
+			PFLAG[0] = true;
+			break;
+
+		case 2'03'200:
+			DIALOG(
+					SPEAKER_NARRATOR,
+					"An airlock is left open. I take a glance inside" LINE 
+					"to find nothing of interest.",
+					false
+				  );
+			break;
+
+		case 2'04'000:
+			DIALOG(
+					SPEAKER_NARRATOR,
+					"I go through the airlock and board the ship.",
+					true
+				  );
+			break;
+		case 2'04'001:
+			transitionToShip(state, 4, 5);
+			ENDDIALOGUEP;
+			break;
+		case 2'04'100:
+			DIALOG(
+					SPEAKER_NARRATOR,
+					"Thats the second shift done for the time being." LINE 
+					"I should go to bed, got nothing better to do.",
+					false
+				  );
+			break;
+
+
 		default:
 			DIALOG("ERROR", TextFormat("Case not found for dialogNum %d", dialog), false);
 			break;

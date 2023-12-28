@@ -1,5 +1,6 @@
 #include "game.h"
 #include <cmath>
+#include <cstdio>
 #include <raylib.h>
 #include <cstring>
 #include <raymath.h>
@@ -22,7 +23,10 @@ void DrawStation(GameState* state) {
 			break;
         case MAIN_HALLWAY:
 			PLAYERBOUNDS(-80, 383);
-			DrawTexture(state->textures.mainHall, -112, -112, WHITE);
+			if(PDAY != 2)
+				DrawTexture(state->textures.mainHall, -112, -112, WHITE);
+			else 
+				DrawTexture(state->textures.mainHallDay2, -112, -112, WHITE);
 			break;
         case SHIP_BOARDING:
 			DrawTexture(state->textures.shipBoarding, -112, -112, WHITE);
@@ -32,7 +36,7 @@ void DrawStation(GameState* state) {
 			DrawTexture(state->textures.cafeteria, -112, -112, WHITE);
 			break;
         case MANAGERS_OFFICE:
-			DrawTexture(state->textures.shipBoarding, -112, -112, WHITE);
+			DrawTexture(state->textures.managerRoom, -112, -112, WHITE);
     		break;
         case INTRO:
 		  DrawRectangle(0, 0, 2000, 2000, BLACK);
@@ -58,6 +62,9 @@ void DoStation(GameState* state, Camera2D* stationCam, Camera3D* shipCam) {
 			if(state->station.stationLevel == SHIP_BOARDING) {
 				stationCam->target.x = 25;
 			}
+			if(state->station.stationLevel == MANAGERS_OFFICE) {
+				stationCam->target.x = 25;
+			}
 			if(state->station.stationState != STATION_SUBSTATE::SLEEPING) {
 				BeginMode2D(*stationCam);
 					DrawStation(state);
@@ -78,6 +85,16 @@ void DoStation(GameState* state, Camera2D* stationCam, Camera3D* shipCam) {
 				state->station.sleep.time -= GetFrameTime();
 				if(state->station.sleep.time <= 0) {
 					state->station.stationState = STATION_SUBSTATE::WALK;
+					switch(state->story.day) {
+						case 1:
+						case 2:
+							undertale(state, 2'01'001);
+							break;
+						case 3:
+						default:
+							printf("DoStation(): DAY %d NOT IMPLEMENTED\n", state->story.day);
+							break;
+					}
 					for(int i = 0; i < 32; i++)
 						state->story.flags[i] = 0;
 
@@ -164,11 +181,21 @@ void CheckInteract(GameState* state) {
 				}
 			} else {
 				INTERACTABLE(-93, -44.5, 40.5, 43.5, 101); // TRANSITION TO MAIN HALLWAY
+				if(PDAY == 2) {
+					INTERACTABLE(-45, -32, 10.5, 17.5, 2'01'200); // DIARY DAY 2
+				}
+				if(PFLAG[1]) {
+					INTERACTABLE(40, -45, 55, 16, 2'01'100);
+				}
 			}
 			break;
         case MAIN_HALLWAY:
-			if(PFLAG[4]) {
-				INTERACTABLE(-92, -44.5, 39.5, 44, 201'1);
+			if(PDAY == 1) {
+				if(PFLAG[4]) {
+					INTERACTABLE(-92, -44.5, 39.5, 44, 201'1);
+				} else {
+					INTERACTABLE(-92, -44.5, 39.5, 44, 201);
+				}
 			} else {
 				INTERACTABLE(-92, -44.5, 39.5, 44, 201);
 			}
@@ -178,10 +205,19 @@ void CheckInteract(GameState* state) {
 			} else { 
 				INTERACTABLE(163, -45, 41, 45, 1'02'500);
 			}
-			if(PFLAG[3]) {
-				INTERACTABLE(291, -45, 41, 45, 204);
-			} else  {
-				INTERACTABLE(291, -45, 41, 45, 1'02'400);
+			if(PDAY == 1) {
+				if(PFLAG[3]) {
+					INTERACTABLE(291, -45, 41, 45, 204);
+				} else  {
+					INTERACTABLE(291, -45, 41, 45, 1'02'400);
+				}
+			}
+			if(PDAY == 2) {
+				if(PFLAG[0]) {
+					INTERACTABLE(291, -45, 41, 45, 204);
+				} else {
+					INTERACTABLE(291, -45, 41, 45, 2'02'000);
+				}
 			}
 
 			INTERACTABLE(-44, -37, 17, 12, 1'02'001);
@@ -193,7 +229,11 @@ void CheckInteract(GameState* state) {
 			INTERACTABLE(-93, -45, 41, 44.5, 401);  // DOOR TO MAIN_HALLWAY
 			INTERACTABLE(-9, -39, 19, 39, 1'03'000);
 			INTERACTABLE(50, -45, 44, 29, 1'03'100);
-			INTERACTABLE(99, -45, 41, 45, 1'03'200);
+			if(PDAY == 1 && !PFLAG[4]) {
+				INTERACTABLE(99, -45, 41, 45, 1'03'200);
+			} else if(PDAY == 2 && !PFLAG[1]) {
+				INTERACTABLE(99, -45, 41, 45, 2'04'000);
+			}
 			break;
         case CAFETERIA:
 			INTERACTABLE(-93, -45, 41, 44.5, 301);  // DOOR TO MAIN_HALLWAY
@@ -206,6 +246,10 @@ void CheckInteract(GameState* state) {
 			INTERACTABLE(147, -45, 41, 44.5, 1'04'200); // BACKROOM DOOR (LOCKED DIALOGUE)
 			break;
         case MANAGERS_OFFICE:
+			INTERACTABLE(16.5, -32, 38.5, 21, 2'03'100); // LAPTOP
+			INTERACTABLE(68, -37, 17, 12, 2'03'000); // DORM SIGN
+			INTERACTABLE(99, -45, 41, 45, 2'03'200); // DORM DOOR
+			INTERACTABLE(-93, -45, 41, 45, 501);
           break;
         case INTRO:
           break;
@@ -228,6 +272,11 @@ void DrawPlayerTex(GameState *state) {
 }
 
 void transitionToSleep(GameState *state) {
+	state->transition.active = true; 
+	state->transition.onPeak = -1;
+	state->transition.dialogAfter = false;
+	state->transition.transitionTime = 1;
+	state->transition.maxTransitionTime = 1;
 	state->station.stationState = STATION_SUBSTATE::SLEEPING;
 	state->station.sleep.time = 10;
 	for(int i = 0; i < 50; i++) {
@@ -263,4 +312,17 @@ void transitionToStationLevel(GameState *state, int level, bool dialogAfter, int
 
 	state->station.playerPosition = {0,0};
 	ENDDIALOGUEP;
+}
+
+void walkSound(GameState *state) {
+	if(state->station.anim.currentCycle == 1) {
+		if(!IsSoundPlaying(state->sounds.walkLeft)) {
+			PlaySound(state->sounds.walkLeft);
+		} 
+	}
+	if(state->station.anim.currentCycle == 3) {
+		if(!IsSoundPlaying(state->sounds.walkRight)) {
+			PlaySound(state->sounds.walkRight);
+		} 
+	}
 }
