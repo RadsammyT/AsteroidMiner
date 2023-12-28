@@ -805,6 +805,9 @@ void undertale(GameState* state, int dialog) {
 					"I should go to bed, got nothing better to do.",
 					false
 				  );
+			//should fix an issue regarding after-shift dialog on day 2
+			//state->transition.transitionTime = state->transition.maxTransitionTime;
+			//breaking news: me is certified dumbass
 			break;
 
 
