@@ -1,0 +1,24 @@
+day 1:
+	flag 0: is the phone ringing? ON = emit phone ringing sound
+			until flag 1 is on
+	flag 1: is the phone answered? phone ringing sound is no longer
+			emitted once this is on
+	flag 2: read the diary? if off, you cannot go through the 
+			airlock, dialogue being "I should read the book first."
+			If on, then airlock is available, but you cannot 
+			read the book for today.
+	flag 3: ate food in cafeteria? if off, you cannot board the
+			ship to do your shift. you can board the ship otherwise.
+	flag 4: completed your shift? you are able to sleep to go to next
+			day, unable to otherwise. 
+
+day 2:
+	flag 0: read the laptop emails? ship is available if on.
+	flag 1: completed your shift? sleep if on.
+
+day 3: 
+	flag 0: is phone ringing? sound ring plays if on 
+	flag 1: is phone answered?
+	flag 2: did shift? make advantage of this flag by 
+			switching to different textures
+

@@ -56,9 +56,10 @@ web:
 	-I. -I./raylib/raylib-5.0/src -Ilibs \
 	-L. -L./raylib/raylib-5.0/src -Llibs/out/web \
 	-s USE_GLFW=3 -s ASYNCIFY \
-	-s TOTAL_MEMORY=1024MB \
+	-s TOTAL_MEMORY=256MB \
 	--preload-file resources/web/ \
 	-s EXPORTED_RUNTIME_METHODS=ccall \
+	--shell-file=./raylib/raylib-5.0/src/minshell.html \
 	-DPLATFORM_WEB $(ADDITIONAL_FLAGS)
 
 compileRaylibWeb:
