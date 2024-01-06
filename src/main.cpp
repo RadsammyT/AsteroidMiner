@@ -50,6 +50,7 @@ int main() {
 #endif
 	state.textures.raylibLogo = LoadTexture("resources/web/raylib.png");
 	state.textures.basePlayer = LoadTexture("resources/web/manBase.png");
+	state.textures.basePlayerFinale = LoadTexture("resources/web/manBase_finale.png");
 
 	state.textures.testRoom = LoadTexture("resources/web/test_room_16.png");
 	state.textures.protagRoom =
@@ -57,11 +58,13 @@ int main() {
 	state.textures.mainHall = LoadTexture("resources/web/main_hall.png");
 	state.textures.mainHallDay2 =
 		LoadTexture("resources/web/main_hall_day_2.png");
+	state.textures.mainHallFinale = LoadTexture("resources/web/main_hall_finale.png");
 	state.textures.cafeteria = LoadTexture("resources/web/cafe_furnished.png");
 	state.textures.managerRoom =
 		LoadTexture("resources/web/manager_office_furnished.png");
 	state.textures.shipBoarding =
 		LoadTexture("resources/web/ship_boarding_furnished.png");
+	state.textures.shipBoardingFinale = LoadTexture("resources/web/ship_boarding_finale.png");
 
 	state.textures.shipUiLeft = LoadTexture("resources/web/ship_ui_left.png");
 	state.textures.shipUiRight= LoadTexture("resources/web/ship_ui_right.png");
@@ -77,6 +80,7 @@ int main() {
 	state.textures.shipParticle = LoadTexture("resource/web/asteroid_01.png");
 	state.textures.shipMonsterSprite =
 		LoadTexture("resources/web/monster_space.png");
+	state.textures.stationMonsterSprite = LoadTexture("resources/web/monster.png");
 
 	Camera2D stationCam = {
 		.offset = {(float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2},
@@ -117,6 +121,7 @@ int main() {
 	// re-export.
 	state.models.station = LoadModel("resources/web/new_station.obj");
 
+	state.sounds.spaceAmbience = LoadSound("resources/web/space-ambience.wav");
 	state.sounds.coin = LoadSound("resources/web/coin.wav");
 	state.sounds.phoneRing = LoadSound("resources/web/phone_low.wav");
 	state.sounds.walkLeft = LoadSound("resources/web/walk1.wav");
@@ -127,6 +132,8 @@ int main() {
 	state.sounds.lasering = LoadSound("resources/web/laser_continuous.wav");
 	state.sounds.doorOpen = LoadSound("resources/web/door_open.wav");
 	state.sounds.doorClose = LoadSound("resources/web/door_close.wav");
+
+	state.sounds.jumpscare = LoadSound("resources/web/jumpscare.wav");
 
 	state.sounds.protagDialog.Load(
 		LoadSound("resources/web/protag_dialog_sound.wav"));
@@ -156,6 +163,9 @@ int main() {
 		}
 		if (state.gameState == GAME_STATE::STATE_SHIP) {
 			DoShip(&state, &shipCam);
+		}
+		if(state.gameState == GAME_STATE::STATE_AFTERSCARE) {
+			DoAfterscare(&state);
 		}
 #if DEBUG_MODE
 		if (drawTestTex) {

@@ -102,6 +102,8 @@
 
 #define DIALOG_VOLUME 0.5f
 
+#define DRAWTEXTCENTER(str, x, y, size, color) DrawText(str, x-(MeasureText(str,size)/2), y, size, color)
+
 const Rectangle WALKING_CYCLE_ARR[5] = {
 	MAN_SPRITE_WALK1_SOURCE, MAN_SPRITE_MIDWALK_SOURCE, MAN_SPRITE_WALK2_SOURCE,
 	MAN_SPRITE_MIDWALK_SOURCE, MAN_SPRITE_STAND_SOURCE};
@@ -113,6 +115,7 @@ enum GAME_STATE {
 	STATE_TITLE,
 	STATE_STATION, // 2d
 	STATE_SHIP,
+	STATE_AFTERSCARE
 };
 
 enum GAMEOVER_CAUSE { OUTOFBOUNDS, EXCESSIVESPIN, OBJECTCOLLISION };
@@ -198,6 +201,10 @@ struct GameState {
 			DIALOG_SOUND dialogueSound;
 		} dialogue;
 		struct {
+			bool active;
+			float position;
+		} monster;
+		struct {
 			std::vector<ShipAsteroid> asteroids;
 			Camera3D cam;
 			float maxTime;
@@ -218,7 +225,8 @@ struct GameState {
 		float laserCharge; // also 1.00 to 0.00. about 5 seconds to use up, 10
 		                   // seconds to recharge
 		bool isLasering;
-		RayCollision laserCollide;
+		bool laserHit;
+		Vector2 laserCollide;
 		float airBreakCharge; // 1.00 to 0.00
 
 		std::vector<ShipAsteroid> asteroids;
@@ -244,21 +252,29 @@ struct GameState {
 		} monster;
 	} ship;
 	struct {
+		float timeUntil;
+		int state;
+	} afterscare;
+	struct {
 		Texture raylibLogo;
 		Texture button_e;
 		Texture button_r;
 
 		Texture basePlayer;
+		Texture basePlayerFinale;
 
 		Texture testRoom;
 		Texture protagRoom;
 
 		Texture mainHall;
 		Texture mainHallDay2;
+		Texture mainHallFinale;
 
 		Texture cafeteria;
 		Texture managerRoom;
+
 		Texture shipBoarding;
+		Texture shipBoardingFinale;
 
 		Texture shipUiLeft;
 		Texture shipUiRight;
@@ -269,6 +285,7 @@ struct GameState {
 
 		Texture shipParticle;
 		Texture shipMonsterSprite;
+		Texture stationMonsterSprite;
 	} textures;
 	struct {
 		Model errorFallback; // Used when something went wrong when determining
@@ -301,6 +318,9 @@ struct GameState {
 		Sound mined;
 		Sound lasering;
 		Sound rocket;
+
+		Sound spaceAmbience;
+		Sound jumpscare;
 
 		SoundPack protagDialog;
 		SoundPack bossDialog;
@@ -368,6 +388,8 @@ void DrawStation(GameState*);
 void DoStation(GameState*, Camera2D*, Camera3D*);
 
 void DoShip(GameState*, Camera3D*);
+
+void DoAfterscare(GameState*);
 
 void CheckInteract(GameState*);
 void HandleState(GameState*, Camera3D*);

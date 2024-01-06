@@ -768,6 +768,13 @@ void undertale(GameState* state, int dialog) {
 		       false);
 		break;
 
+	case 3'01'200:
+		DIALOG(SPEAKER_NARRATOR, 
+			   "I flip through the pages to where I last left off." LINE 
+			   ,
+			   true);
+		break;
+
 	case 3'02'000:
 		DIALOG(SPEAKER_NARRATOR, "I probably shouldn't go in there again.",
 		       false);

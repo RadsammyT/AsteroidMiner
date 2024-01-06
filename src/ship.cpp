@@ -86,7 +86,8 @@ void DoShip(GameState* state, Camera3D* cam) {
 			Vector2Add(state->ship.shipPosition, Vector2Scale({x, z}, 100)));
 		dest.y = 0;
 		DrawCylinderEx(
-			{state->ship.shipPosition.x, -1, state->ship.shipPosition.y}, dest,
+			{state->ship.shipPosition.x, -1, state->ship.shipPosition.y},
+			state->ship.laserHit ? Vector2to3XZ(state->ship.laserCollide) : dest,
 			0.025, 0.025, 40, RED);
 	}
 	EndMode3D();

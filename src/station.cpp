@@ -23,13 +23,21 @@ void DrawStation(GameState* state) {
 		break;
 	case MAIN_HALLWAY:
 		PLAYERBOUNDS(-80, 383);
-		if (PDAY != 2)
+		if (PDAY == 1)
 			DrawTexture(state->textures.mainHall, -112, -112, WHITE);
-		else
+		else if(PDAY == 2)
 			DrawTexture(state->textures.mainHallDay2, -112, -112, WHITE);
+		else if(PDAY == 3 && PFLAG[2])
+			DrawTexture(state->textures.mainHallFinale, -112, -112, WHITE);
+		else 
+			DrawTexture(state->textures.mainHall, -112, -112, WHITE);
+			
 		break;
 	case SHIP_BOARDING:
-		DrawTexture(state->textures.shipBoarding, -112, -112, WHITE);
+		if(PDAY == 3 && PFLAG[2])
+			DrawTexture(state->textures.shipBoardingFinale, -112, -112, WHITE);
+		else 
+			DrawTexture(state->textures.shipBoarding, -112, -112, WHITE);
 		break;
 	case CAFETERIA:
 		PLAYERBOUNDS(-80, 190);
@@ -48,6 +56,23 @@ void DoStation(GameState* state, Camera2D* stationCam, Camera3D* shipCam) {
 	if (PFLAG[0] && !PFLAG[1] && (PDAY == 1 || PDAY == 3)) {
 		if (!IsSoundPlaying(state->sounds.phoneRing)) {
 			PlaySound(state->sounds.phoneRing);
+		}
+	}
+
+	if(PDAY == 3 && PFLAG[2] && state->station.stationLevel == MAIN_HALLWAY) {
+		if(state->station.playerPosition.x <= 138 && !state->station.monster.active) {
+			state->station.monster.active = true;
+			state->station.monster.position = -90;
+			PlaySound(state->sounds.jumpscare);
+		}
+	}
+	if(PDAY == 3 && PFLAG[2] && state->station.stationLevel == SHIP_BOARDING) {
+		if(!IsSoundPlaying(state->sounds.spaceAmbience)) {
+			PlaySound(state->sounds.spaceAmbience);
+		}
+	} else {
+		if(IsSoundPlaying(state->sounds.spaceAmbience)) {
+			StopSound(state->sounds.spaceAmbience);
 		}
 	}
 
@@ -76,6 +101,23 @@ void DoStation(GameState* state, Camera2D* stationCam, Camera3D* shipCam) {
 		}
 #endif
 		DrawPlayerTex(state);
+		if(state->station.monster.active) {
+			auto& mon = state->station.monster;
+			mon.position += 150 * GetFrameTime();
+			if(mon.position + 100 >= state->station.playerPosition.x) {
+				SetSoundVolume(state->sounds.explode, 5.5);
+				PlaySound(state->sounds.explode);
+				StopSound(state->sounds.jumpscare);
+				state->gameState = GAME_STATE::STATE_AFTERSCARE;
+				state->afterscare.timeUntil = 3;
+			}
+			Rectangle imgRec = {0, 0, (float)state->textures.stationMonsterSprite.width
+				, (float)state->textures.stationMonsterSprite.height};
+			DrawTexturePro(state->textures.stationMonsterSprite,
+					imgRec,
+					{mon.position, -96, 100, 100},
+					{0,0}, 0, {127, 127, 127, 255});
+		}
 		if (!state->transition.active)
 			CheckInteract(state);
 		EndMode2D();
@@ -230,20 +272,24 @@ void CheckInteract(GameState* state) {
 				INTERACTABLE(291, -45, 41, 45, 2'02'000);
 			}
 		}
-		if (PDAY == 3) {
+		if (PDAY == 3 && !PFLAG[2]) {
 			INTERACTABLE(291, -45, 41, 45, 204);
 			INTERACTABLE(163, -45, 41, 45, 3'02'000);
 		}
-
-		INTERACTABLE(-44, -37, 17, 12, 1'02'001);
-		INTERACTABLE(84, -37, 17, 12, 1'02'100);
-		INTERACTABLE(212, -37, 17, 12, 1'02'200);
-		INTERACTABLE(340, -37, 17, 12, 1'02'300);
+		if(PDAY == 3 && PFLAG[2]) {
+		} else {
+			INTERACTABLE(-44, -37, 17, 12, 1'02'001);
+			INTERACTABLE(84, -37, 17, 12, 1'02'100);
+			INTERACTABLE(212, -37, 17, 12, 1'02'200);
+			INTERACTABLE(340, -37, 17, 12, 1'02'300);
+		}
 		break;
 	case SHIP_BOARDING:
 		INTERACTABLE(-93, -45, 41, 44.5, 401); // DOOR TO MAIN_HALLWAY
-		INTERACTABLE(-9, -39, 19, 39, 1'03'000);
-		INTERACTABLE(50, -45, 44, 29, 1'03'100);
+		if(PDAY != 3 && !PFLAG[2]) {
+			INTERACTABLE(-9, -39, 19, 39, 1'03'000);
+			INTERACTABLE(50, -45, 44, 29, 1'03'100);
+		}
 		if (PDAY == 1 && !PFLAG[4]) {
 			INTERACTABLE(99, -45, 41, 45, 1'03'200);
 		} else if (PDAY == 2 && !PFLAG[1]) {
@@ -283,6 +329,13 @@ void DrawPlayerTex(GameState* state) {
 	auto multi = WALKING_CYCLE_ARR[state->station.anim.currentCycle];
 	if (state->station.anim.direction) {
 		multi.width *= -1;
+	}
+	if(PDAY == 3 && PFLAG[2]) {
+		DrawTexturePro(state->textures.basePlayerFinale, multi,
+					   {state->station.playerPosition.x,
+						state->station.playerPosition.y - 14.0f, 52, 52},
+					   {32, 32}, 0.0f, WHITE);
+		return;
 	}
 	DrawTexturePro(state->textures.basePlayer, multi,
 	               {state->station.playerPosition.x,

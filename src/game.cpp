@@ -22,39 +22,44 @@ void DoTitle(GameState* state) {
 	DrawModelEx(state->models.size5AstBurrowed, {0, 0, 0}, rotation,
 	            GetTime() * 10, {2.5, 2.5, 2.5}, WHITE);
 	EndMode3D();
+	if(state->afterscare.state == 2) {
+		DRAWTEXTCENTER("INSERT END CREDITS HERE", WIDTH/2, 0, 45, WHITE);
+	} else {
+		int len = MeasureText("Asteroid Miner", 48);
+		int middle = len - (len / 2);
+		DrawText("Asteroid Miner", (WIDTH / 2) - middle, 180, 48, {255, 0, 0, 255});
 
-	int len = MeasureText("Asteroid Miner", 48);
-	int middle = len - (len / 2);
-	DrawText("Asteroid Miner", (WIDTH / 2) - middle, 180, 48, {255, 0, 0, 255});
+		len = MeasureText("by RadsammyT", 24);
+		middle = len - (len / 2);
+		DrawText("by RadsammyT", (WIDTH / 2) - middle, 230, 24, RED);
 
-	len = MeasureText("by RadsammyT", 24);
-	middle = len - (len / 2);
-	DrawText("by RadsammyT", (WIDTH / 2) - middle, 230, 24, RED);
+		len = MeasureText("Press Enter to Play", 48);
+		middle = len - (len / 2);
+		DrawText("Press Enter to Play", (WIDTH / 2) - middle, HEIGHT - 70, 48,
+				 GRAY);
 
-	len = MeasureText("Press Enter to Play", 48);
-	middle = len - (len / 2);
-	DrawText("Press Enter to Play", (WIDTH / 2) - middle, HEIGHT - 70, 48,
-	         GRAY);
+		DrawText("Credts:\n"
+				 "Asteroid Models (original and modified) by Albert Buscio on "
+				 "Sketchfab\n"
+				 "Sci-Fi platform tiles by Eris on OpenGameArt.org\n"
+				 "Phone Ring SFX by timgormly on Freesound\n"
+				 "Footsteps SFX by EVRetro on Freesound\n"
+				 "Door SFX (modified) by MicktheMicGuy on FreeSound\n"
+				 "Space Ambience SFX by Sonicfreak on Freesound\n"
+				 "Rocket SFX by metrostock99 on Freesound\n"
+				 "Laser SFX by anapb on Freesound\n",
+				 0, 0, 12, RAYWHITE);
 
-	DrawText("Credts:\n"
-	         "Asteroid Models (original and modified) by Albert Buscio on "
-	         "Sketchfab\n"
-	         "Sci-Fi platform tiles by Eris on OpenGameArt.org\n"
-	         "Phone Ring SFX by timgormly on Freesound\n"
-	         "Footsteps SFX by EVRetro on Freesound\n"
-	         "Door SFX (modified) by MicktheMicGuy on FreeSound\n"
-	         "",
-	         0, 0, 12, RAYWHITE);
+		DrawText("Instructions:\n"
+				 "(A/D) or (Left Arrow/Right Arrow) to walk\n"
+				 "(E) to interact with an object or when prompted\n"
+				 "(R) to 'fast-forward' dialogue\n"
+				 "Additional instructions will be given out in-game.",
+				 0, HEIGHT-(12*6), 12, RAYWHITE);
 
-	DrawText("Instructions:\n"
-	         "(A/D) or (Left Arrow/Right Arrow) to walk\n"
-	         "(E) to interact with an object or when prompted\n"
-	         "(R) to 'fast-forward' dialogue\n"
-	         "Additional instructions will be given out in-game.",
-	         0, HEIGHT-(12*6), 12, RAYWHITE);
-
-	if (IsKeyPressed(KEY_ENTER)) {
-		state->gameState = STATE_STATION;
+		if (IsKeyPressed(KEY_ENTER)) {
+			state->gameState = STATE_STATION;
+		} 
 	}
 }
 
@@ -224,6 +229,7 @@ void HandleState(GameState* state, Camera3D* cam) {
 				if(!IsSoundPlaying(state->sounds.lasering)) {
 					PlaySound(state->sounds.lasering);
 				}
+				ship->laserHit = false;
 				for (int i = 0; i < ship->asteroids.size(); i++) {
 					// TODO: rewrite collision with 2d in mind
 					Vector2 laserEdge = Vector2Add(ship->shipPosition,
@@ -243,6 +249,8 @@ void HandleState(GameState* state, Camera3D* cam) {
 								lerpped, ship->asteroids[i].pos,
 								ship->asteroids[i].getSphereRad())) {
 #endif
+							ship->laserHit = true;
+							ship->laserCollide = lerpped;
 							ship->asteroids[i].lasered = true;
 							ship->asteroids[i].durability -= 1 * GetFrameTime();
 							if (!ship->asteroids[i].burrowed) {
@@ -409,6 +417,9 @@ void HandleState(GameState* state, Camera3D* cam) {
 			}
 			if (state->ship.ascensionState == 1) {
 				cam->position.y += 1 * GetFrameTime();
+				if(cam->position.x != 0 || cam->position.z != 0) {
+					cam->position = {0, cam->position.y, 0};
+				}
 				float x = std::sin(state->ship.shipRotation) * DEG2RAD;
 				float z = std::cos(state->ship.shipRotation) * DEG2RAD;
 				cam->target = {x, cam->position.y, z};
@@ -431,7 +442,7 @@ void HandleState(GameState* state, Camera3D* cam) {
 						PSETPLAYERPOS(127.82);
 						break;
 					case 3:
-						PFLAG[1] = true;
+						PFLAG[2] = true;
 						transitionToStationLevel(state, SHIP_BOARDING, 0,
 						                         -1, 0);
 						state->transition.maxTransitionTime = 5;
@@ -562,5 +573,24 @@ void DoPreTitle(GameState* state) {
 	}
 	if(state->pretitle.timeToStateChange < 0) {
 		state->gameState = GAME_STATE::STATE_TITLE;
+	}
+}
+
+void DoAfterscare(GameState *state) {
+	ClearBackground(RED);
+	DrawText("ASTEROID MINER", (WIDTH/2)-(MeasureText("ASTEROID MINER", 60)/2), HEIGHT/2, 60, WHITE);
+	state->afterscare.timeUntil -= GetFrameTime();
+	if(state->afterscare.state == 1) {
+		float time = (state->afterscare.timeUntil - 1) / -1;
+		DrawRectangleRec({0,0,WIDTH,HEIGHT},{0,0,0,(unsigned char)((time)*255)});
+	}
+	if(state->afterscare.timeUntil <= 0) {
+		if(state->afterscare.state == 0) { // original title drop
+			state->afterscare.timeUntil = 1;
+		}
+		if(state->afterscare.state == 1) {
+			state->gameState = GAME_STATE::STATE_TITLE;
+		}
+		state->afterscare.state++;
 	}
 }
