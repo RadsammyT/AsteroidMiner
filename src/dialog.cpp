@@ -775,11 +775,46 @@ void undertale(GameState* state, int dialog) {
 			   true);
 		break;
 
+
+	case 3'01'201:
+		DIALOGS("Book (Peter)",
+				"I know who- or rather what is making these asteroids" LINE 
+				"hallow now. And I swear to god- whatever that THING was" LINE 
+				"doing, I disrupted it, and it just went away, immediately.",
+				true, DIALOG_SOUND::PETER);
+		break;
+	case 3'01'202:
+		DIALOGS("Book (Peter)",
+				"And then I knew- its gonna come for me now." LINE 
+				"I just know it.",
+				true, DIALOG_SOUND::PETER);
+		break;
+	case 3'01'203:
+		DIALOGS("Book (Peter)",
+				"So I'm getting the fuck out of here." LINE
+				"Just take a joyride in the ship and just fly off." LINE 
+				"Yeah. That'd be nice.",
+				true, DIALOG_SOUND::PETER);
+		break;
+	case 3'01'204:
+		DIALOGS("Book (Peter)",
+				"You know what? I might as well do it right now.",
+				true, DIALOG_SOUND::PETER);
+		break;
+
+	case 3'01'205:
+		DIALOG(SPEAKER_NARRATOR,
+			  	"I turn the next page to find it blank. Flipping" LINE 
+				"through all of them reveals that they are all " LINE 
+				"blank too.",
+				false
+				);
+		break;
+
 	case 3'02'000:
 		DIALOG(SPEAKER_NARRATOR, "I probably shouldn't go in there again.",
 		       false);
 		break;
-
 	case 3'04'000:
 		DIALOG(SPEAKER_NARRATOR,
 		       "I once again open the airlock and board the ship.", true);

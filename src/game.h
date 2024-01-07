@@ -225,6 +225,8 @@ struct GameState {
 		float laserCharge; // also 1.00 to 0.00. about 5 seconds to use up, 10
 		                   // seconds to recharge
 		bool isLasering;
+		float timeUntilNextDecal; // default 0.1
+		int decalIndex;
 		bool laserHit;
 		Vector2 laserCollide;
 		float airBreakCharge; // 1.00 to 0.00
@@ -283,7 +285,7 @@ struct GameState {
 		Texture shipAirbreakGauge;
 		Texture shipLaserGauge;
 
-		Texture shipParticle;
+		Texture shipLaserImpact;
 		Texture shipMonsterSprite;
 		Texture stationMonsterSprite;
 	} textures;

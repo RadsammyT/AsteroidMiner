@@ -23,7 +23,33 @@ void DoTitle(GameState* state) {
 	            GetTime() * 10, {2.5, 2.5, 2.5}, WHITE);
 	EndMode3D();
 	if(state->afterscare.state == 2) {
-		DRAWTEXTCENTER("INSERT END CREDITS HERE", WIDTH/2, 0, 45, WHITE);
+		DRAWTEXTCENTER("Thanks for playing!", WIDTH/2, 0, 45, WHITE);
+		DRAWTEXTCENTER("This does happen to be my first gamejam, so even with the 30 days", WIDTH/2, HEIGHT/2, 24, WHITE);
+		DRAWTEXTCENTER("you might have already seen some jank in the game. If thats the case, then WHOOPS.",
+				WIDTH/2, (HEIGHT/2)+24, 24, WHITE);
+		DRAWTEXTCENTER("Press R to return to Title",
+				WIDTH/2, HEIGHT-24, 24, WHITE);
+		if(IsKeyPressed(KEY_R)) {
+			state->gameState = STATE_PRETITLE;
+			state->pretitle.timeToStateChange = 3;
+			state->pretitle.soundPlayed = false;
+			state->station.playerPosition = {0, 0};
+			state->station.stationLevel = INTRO;
+			state->station.stationState = WALK;
+			state->station.dialogue = {
+				.timeToNextChar = 0,
+			};
+			state->afterscare.state = 0;
+			state->afterscare.timeUntil = 0;
+			undertale(state, 1'00'000);
+
+			state->transition = {};
+			state->station.anim.currentCycle = 3;
+			state->station.monster.active = false;
+			state->story.day = 1;
+			for(bool& i: state->story.flags) i = false;
+			ClearBackground(BLACK);
+		}
 	} else {
 		int len = MeasureText("Asteroid Miner", 48);
 		int middle = len - (len / 2);
@@ -37,7 +63,7 @@ void DoTitle(GameState* state) {
 		middle = len - (len / 2);
 		DrawText("Press Enter to Play", (WIDTH / 2) - middle, HEIGHT - 70, 48,
 				 GRAY);
-
+		/*
 		DrawText("Credts:\n"
 				 "Asteroid Models (original and modified) by Albert Buscio on "
 				 "Sketchfab\n"
@@ -49,7 +75,7 @@ void DoTitle(GameState* state) {
 				 "Rocket SFX by metrostock99 on Freesound\n"
 				 "Laser SFX by anapb on Freesound\n",
 				 0, 0, 12, RAYWHITE);
-
+		*/
 		DrawText("Instructions:\n"
 				 "(A/D) or (Left Arrow/Right Arrow) to walk\n"
 				 "(E) to interact with an object or when prompted\n"
@@ -276,7 +302,7 @@ void HandleState(GameState* state, Camera3D* cam) {
 										.size = 1,
 										.lifetime = 5,
 										.originalLifetime = 5,
-										.tex = &state->textures.shipParticle});
+										.tex = &state->textures.shipLaserImpact});
 								}
 								PlaySound(state->sounds.explode);
 								ship->asteroids.erase(ship->asteroids.begin() +
@@ -554,6 +580,7 @@ int SoundPack::soundsPlaying() {
 Vector3 Vector2to3XZ(Vector2 in) { return {in.x, 0, in.y}; }
 
 void DoPreTitle(GameState* state) {
+	ClearBackground(BLACK);
 	if(!state->pretitle.soundPlayed) {
 		PlaySound(state->sounds.coin);
 		state->pretitle.soundPlayed = true;
@@ -577,7 +604,7 @@ void DoPreTitle(GameState* state) {
 }
 
 void DoAfterscare(GameState *state) {
-	ClearBackground(RED);
+	ClearBackground({255,0,0,255});
 	DrawText("ASTEROID MINER", (WIDTH/2)-(MeasureText("ASTEROID MINER", 60)/2), HEIGHT/2, 60, WHITE);
 	state->afterscare.timeUntil -= GetFrameTime();
 	if(state->afterscare.state == 1) {

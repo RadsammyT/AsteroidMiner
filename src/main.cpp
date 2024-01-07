@@ -77,10 +77,10 @@ int main() {
 		LoadTexture("resources/web/uiAirbreak.png");
 	state.textures.shipLaserGauge = LoadTexture("resources/web/uiLaser.png");
 
-	state.textures.shipParticle = LoadTexture("resource/web/asteroid_01.png");
+	state.textures.shipLaserImpact = LoadTexture("resources/web/laser_impact.png");
 	state.textures.shipMonsterSprite =
 		LoadTexture("resources/web/monster_space.png");
-	state.textures.stationMonsterSprite = LoadTexture("resources/web/monster.png");
+	state.textures.stationMonsterSprite = LoadTexture("resources/web/wtf_scary.png");
 
 	Camera2D stationCam = {
 		.offset = {(float)GetScreenWidth() / 2, (float)GetScreenHeight() / 2},
@@ -146,6 +146,7 @@ int main() {
 	SetSoundVolume(state.sounds.lasering, 0.5);
 	SetSoundVolume(state.sounds.rocket, 0.2);
 	SetSoundVolume(state.sounds.coin, 0.5);
+	SetSoundVolume(state.sounds.jumpscare, 0.3);
 	state.sounds.protagDialog.SetVolume(DIALOG_VOLUME);
 	state.sounds.aiDialog.SetVolume(DIALOG_VOLUME);
 	state.sounds.bossDialog.SetVolume(DIALOG_VOLUME);

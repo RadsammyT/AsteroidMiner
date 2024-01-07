@@ -85,6 +85,19 @@ void DoShip(GameState* state, Camera3D* cam) {
 		Vector3 dest = Vector2to3XZ(
 			Vector2Add(state->ship.shipPosition, Vector2Scale({x, z}, 100)));
 		dest.y = 0;
+		if(state->ship.laserHit) {
+			state->ship.timeUntilNextDecal -= GetFrameTime();
+			if(state->ship.timeUntilNextDecal <= 0) {
+				state->ship.timeUntilNextDecal = 0.1;
+				state->ship.decalIndex++;
+				if(state->ship.decalIndex > 1) {
+					state->ship.decalIndex = 0;
+				}
+			}
+			DrawBillboardRec(*cam, state->textures.shipLaserImpact,
+					{0 + ((float)state->ship.decalIndex * 32), 0, 32, 32}, Vector2to3XZ(state->ship.laserCollide),
+					{1.5,1.5}, WHITE);
+		}
 		DrawCylinderEx(
 			{state->ship.shipPosition.x, -1, state->ship.shipPosition.y},
 			state->ship.laserHit ? Vector2to3XZ(state->ship.laserCollide) : dest,

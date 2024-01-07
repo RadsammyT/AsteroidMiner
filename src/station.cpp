@@ -71,7 +71,7 @@ void DoStation(GameState* state, Camera2D* stationCam, Camera3D* shipCam) {
 			PlaySound(state->sounds.spaceAmbience);
 		}
 	} else {
-		if(IsSoundPlaying(state->sounds.spaceAmbience)) {
+		if(IsSoundPlaying(state->sounds.spaceAmbience) && state->station.stationState != SLEEPING) {
 			StopSound(state->sounds.spaceAmbience);
 		}
 	}
@@ -109,13 +109,14 @@ void DoStation(GameState* state, Camera2D* stationCam, Camera3D* shipCam) {
 				PlaySound(state->sounds.explode);
 				StopSound(state->sounds.jumpscare);
 				state->gameState = GAME_STATE::STATE_AFTERSCARE;
-				state->afterscare.timeUntil = 3;
+				state->afterscare.timeUntil = 5;
 			}
 			Rectangle imgRec = {0, 0, (float)state->textures.stationMonsterSprite.width
 				, (float)state->textures.stationMonsterSprite.height};
+			DrawRectangle(-96, -96, mon.position + 98, 96, BLACK);
 			DrawTexturePro(state->textures.stationMonsterSprite,
 					imgRec,
-					{mon.position, -96, 100, 100},
+					{mon.position, -96, 96, 96},
 					{0,0}, 0, {127, 127, 127, 255});
 		}
 		if (!state->transition.active)
@@ -124,6 +125,7 @@ void DoStation(GameState* state, Camera2D* stationCam, Camera3D* shipCam) {
 	} else {
 		state->station.sleep.time -= GetFrameTime();
 		if (state->station.sleep.time <= 0) {
+			StopSound(state->sounds.spaceAmbience);
 			state->station.stationState = STATION_SUBSTATE::WALK;
 			for (int i = 0; i < 32; i++)
 				state->story.flags[i] = 0;
@@ -238,7 +240,7 @@ void CheckInteract(GameState* state) {
 			if (PFLAG[1]) {
 				INTERACTABLE(-93, -44.5, 40.5, 43.5,
 				             101); // TRANSITION TO MAIN HALLWAY
-				INTERACTABLE(-45, -32, 10.5, 17.5, DIALOG_TODO); // DIARY DAY 3
+				INTERACTABLE(-45, -32, 10.5, 17.5, 3'01'200); // DIARY DAY 3
 			}
 		}
 		break;
@@ -351,6 +353,8 @@ void transitionToSleep(GameState* state) {
 	state->transition.maxTransitionTime = 1;
 	state->station.stationState = STATION_SUBSTATE::SLEEPING;
 	state->station.sleep.time = 10;
+	SetSoundVolume(state->sounds.spaceAmbience, 1);
+	PlaySound(state->sounds.spaceAmbience);
 	for (int i = 0; i < 50; i++) {
 		int tempSize = (rand() % 5) + 1;
 		state->station.sleep.asteroids.push_back(ShipAsteroid{
