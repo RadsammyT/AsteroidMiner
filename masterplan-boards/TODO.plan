@@ -4,8 +4,8 @@
   "BoardIndex": 0,
   "BoardCount": 1,
   "AutoSave": true,
-  "Pan.X": 311.5548095703125,
-  "Pan.Y": -85.60128784179688,
+  "Pan.X": -704.1904907226562,
+  "Pan.Y": -860.7645263671875,
   "ZoomLevel": 4,
   "TaskTransparency": 5,
   "OutlineTasks": true,
@@ -831,7 +831,7 @@
       "Progression.Max": 0,
       "Description": "",
       "FilePath": ["pics", "New Piskel.New Piskel.png"],
-      "Selected": false,
+      "Selected": true,
       "TaskType.CurrentChoice": 3,
       "CreationTime": "Dec 15 2023 00:39:14"
     }, 
@@ -955,7 +955,7 @@
       "Progression.Current": 0,
       "Progression.Max": 0,
       "Description": "Day 3",
-      "Selected": true,
+      "Selected": false,
       "TaskType.CurrentChoice": 0,
       "CreationTime": "Dec 21 2023 00:40:29"
     }, 
@@ -1194,7 +1194,7 @@
       "Position.X": -304,
       "Position.Y": 64,
       "Checkbox.Checked": false,
-      "Progression.Current": 8,
+      "Progression.Current": 9,
       "Progression.Max": 10,
       "Description": "percentage",
       "Selected": false,
@@ -1224,6 +1224,18 @@
       "Selected": false,
       "TaskType.CurrentChoice": 2,
       "CreationTime": "Jan 3 2024 17:13:54"
+    }, 
+    {
+      "BoardIndex": 0,
+      "Position.X": -576,
+      "Position.Y": 64,
+      "Checkbox.Checked": false,
+      "Progression.Current": 0,
+      "Progression.Max": 0,
+      "Description": "GET STATION\nMONSTER SPRITE\nREADY ALONG WITH\nJUMPSCARE SOUND\nNOWWWWWWWWWWWW!!!",
+      "Selected": false,
+      "TaskType.CurrentChoice": 2,
+      "CreationTime": "Jan 6 2024 02:05:40"
     }
   ]
 }

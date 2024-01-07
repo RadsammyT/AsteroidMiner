@@ -288,7 +288,7 @@ void CheckInteract(GameState* state) {
 		break;
 	case SHIP_BOARDING:
 		INTERACTABLE(-93, -45, 41, 44.5, 401); // DOOR TO MAIN_HALLWAY
-		if(PDAY != 3 && !PFLAG[2]) {
+		if(PDAY == 3 && PFLAG[2]) { } else {
 			INTERACTABLE(-9, -39, 19, 39, 1'03'000);
 			INTERACTABLE(50, -45, 44, 29, 1'03'100);
 		}

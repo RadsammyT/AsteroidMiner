@@ -172,6 +172,7 @@ struct Particle {
 
 struct GameState {
 	GAME_STATE gameState;
+	bool paused;
 	struct {
 		bool soundPlayed = false;
 		float timeToStateChange = 3;

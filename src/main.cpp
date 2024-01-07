@@ -153,20 +153,28 @@ int main() {
 	state.sounds.peterDialog.SetVolume(DIALOG_VOLUME);
 	while (!WindowShouldClose()) {
 		BeginDrawing();
-		if(state.gameState == GAME_STATE::STATE_PRETITLE) {
-			DoPreTitle(&state);
+		if(IsKeyPressed(KEY_P)) {
+			state.paused = !state.paused;
 		}
-		if (state.gameState == GAME_STATE::STATE_TITLE) {
-			DoTitle(&state);
-		}
-		if (state.gameState == GAME_STATE::STATE_STATION) {
-			DoStation(&state, &stationCam, &shipCam);
-		}
-		if (state.gameState == GAME_STATE::STATE_SHIP) {
-			DoShip(&state, &shipCam);
-		}
-		if(state.gameState == GAME_STATE::STATE_AFTERSCARE) {
-			DoAfterscare(&state);
+		if(!state.paused) {
+			if(state.gameState == GAME_STATE::STATE_PRETITLE) {
+				DoPreTitle(&state);
+			}
+			if (state.gameState == GAME_STATE::STATE_TITLE) {
+				DoTitle(&state);
+			}
+			if (state.gameState == GAME_STATE::STATE_STATION) {
+				DoStation(&state, &stationCam, &shipCam);
+			}
+			if (state.gameState == GAME_STATE::STATE_SHIP) {
+				DoShip(&state, &shipCam);
+			}
+			if(state.gameState == GAME_STATE::STATE_AFTERSCARE) {
+				DoAfterscare(&state);
+			}
+		} else {
+
+			DRAWTEXTCENTER("PAUSED", WIDTH/2, HEIGHT/2, 50, WHITE);
 		}
 #if DEBUG_MODE
 		if (drawTestTex) {
